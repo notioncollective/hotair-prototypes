@@ -1,0 +1,40 @@
+{
+  "name": "crafty-webgl-test",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "budo index.js -H localhost --live --open --css styles.css -- -t browserify-shim",
+    "setup": "npm install; cp ./node_modules/craftyjs/dist/crafty.js ./assets/crafty.js",
+    "build": "budo-demo index.js -i assets -c styles.css -m -- -t browserify-shim",
+    "deploy": "npm run build; gh-pages -d dist; npm run clean",
+    "clean": "rm -r dist"
+  },
+  "author": {
+    "name": "Andy Dayton",
+    "email": "amdayton@gmail.com",
+    "url": "http://andydayton.com/"
+  },
+  "browser": {
+    "craftyjs" : "./node_modules/craftyjs/src/crafty.js"
+  },
+  "browserify-shim": {
+    "craftyjs": "global:Crafty"
+  },
+  "dependencies": {
+    "craftyjs": "^0.7.1"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "browserify-shim": "^3.8.12",
+    "budo": "~7.1.0",
+    "budo-demo": "^0.1.1",
+    "gh-pages": "^0.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andyinabox/crafty-webgl-test.git"
+  },
+  "homepage": "https://github.com/andyinabox/crafty-webgl-test"
+}
