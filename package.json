@@ -17,13 +17,14 @@
     "url": "http://andydayton.com/"
   },
   "browser": {
-    "craftyjs" : "./node_modules/craftyjs/src/crafty.js"
+    "craftyjs": "./node_modules/craftyjs/src/crafty.js"
   },
   "browserify-shim": {
     "craftyjs": "global:Crafty"
   },
   "dependencies": {
-    "craftyjs": "^0.7.1"
+    "craftyjs": "^0.7.1",
+    "exdat": "^0.6.2"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
