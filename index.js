@@ -2,6 +2,12 @@
 (function (global){
 var Crafty = (typeof window !== "undefined" ? window['Crafty'] : typeof global !== "undefined" ? global['Crafty'] : null);
 
-console.log('crafty', Crafty);
+Crafty.init();
+Crafty.background('rgb(150,200,255)');
+
+Crafty.e('2D, WebGL, Color, Draggable')
+	.color(255, 255, 255, 1)
+  .attr({x: 13, y: 37, w: 50, h: 50})
+
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1]);
