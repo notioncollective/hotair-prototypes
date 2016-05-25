@@ -17,16 +17,14 @@ Crafty.load(assets, function() {
 	var size = dims.width/5;
 
 
-	var logo = Crafty.e('2D, WebGL, Image, Draggable').image('assets/notion_logo.png')
+	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
+		.image('assets/notion_logo.png')
+		.gravity('2D');
 	  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
 
-
-	var info = Crafty.e('2D, Canvas, Text')
-							.attr({x: 5, y: dims.height - 15})
-							.text("Drag & drop the logo!")
-							.textColor('black');
-
-
+	var platform = Crafty.e('2D, WebGL, Color')
+									.color(0, 255, 100, 1)
+									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});
 
 });
 
