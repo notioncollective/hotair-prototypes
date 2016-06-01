@@ -5,9 +5,9 @@ var assets = {
 	"images" : "assets/notion_logo.png"
 };
 
-
-// var gui = new dat.GUI();
-
+var params = {
+	scene: 'gravity'
+}
 
 // loading scene
 Crafty.defineScene("loading", function() {
@@ -21,11 +21,7 @@ Crafty.defineScene("loading", function() {
 Crafty.defineScene("gravity",function() {
 	Crafty.background("rgb(150,200,255)");
 
-	Crafty.webgl.init();
-
-	// other basic stuff
-	var ctx = Crafty.webgl.context
-	var dims = { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
+	var dims = getDims();
 
 	// logo
 	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
@@ -39,12 +35,31 @@ Crafty.defineScene("gravity",function() {
 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
 });
 
+Crafty.defineScene("simple-touch", function() {
+	Crafty.background("rgb(150,200,255)");
+
+});
+
+function getDims() {
+
+	Crafty.webgl.init();
+
+	// other basic stuff
+	var ctx = Crafty.webgl.context
+	return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
+}
+
 
 // setup crafty
 Crafty.init();
 Crafty.enterScene("loading");
 
+var gui = new dat.GUI();
+gui.add(params, 'scene', ['gravity', 'simple-touch']).onChange(function(val) {
+	Crafty.enterScene(val);
+});
+
 // load & go!
 Crafty.load(assets, function() {
-	Crafty.enterScene("gravity");
+	Crafty.enterScene(params.scene);
 });
