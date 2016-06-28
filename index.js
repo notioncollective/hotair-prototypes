@@ -25,9 +25,6 @@ Crafty.defineScene("loading", function() {
 // Balloon component
 //
 Crafty.c('Balloon', {
-	events: {
-		"EnterFrame": function() { this.tick.apply(this, arguments); }
-	},
 	init: function() {
 		this.requires('2D, WebGL');
 
@@ -38,10 +35,15 @@ Crafty.c('Balloon', {
 			}
 		});
 
+		// move on every frame
+		this.bind('EnterFrame', this.move)
+
 	},
-	tick: function(e) {
-		// console.log('tick', e);
+	move: function(e) {
 		this.y = this.y-1;
+	},
+	hit: function() {
+		this.destroy();
 	}
 });
 
@@ -78,27 +80,20 @@ Crafty.defineScene("simple-touch", function() {
 	var balloon;
 
 	function createBalloon() {
-		balloon = Crafty.e('2D, WebGL, Color, Balloon');
-		balloon.color('red');
-		balloon.attr({
-			w: 50,
-			h: 50,
-			x: Math.random()*dims.width,
-			y: dims.height-50
-		});
+		balloon = Crafty.e('2D, WebGL, Color, Touch, Mouse, Balloon');
+		balloon
+			.color('red')
+			.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
 
 		// check if balloon is offscreen
-		balloon.bind("Offscreen", function() {
-			console.log('Balloon offscreen');
-			balloon.destroy();
-		});
+		balloon.bind("Offscreen", balloon.destroy);
+		
+		// create new balloon when balloon is destroyed
+		balloon.bind("Remove", createBalloon);
 
-		balloon.bind("Remove", function() {
-			console.log('Balloon destroyed');
+		balloon.bind('MouseDown', balloon.hit );
+		balloon.bind('TouchDown', balloon.hit );
 
-			// create new balloon when balloon is destroyed
-			createBalloon();
-		});
 	}
 
 
