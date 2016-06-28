@@ -6,8 +6,11 @@ var assets = {
 };
 
 var params = {
-	scene: 'gravity'
+	scene: 'simple-touch'
 }
+
+var dims;
+var ctx;
 
 // loading scene
 Crafty.defineScene("loading", function() {
@@ -18,10 +21,36 @@ Crafty.defineScene("loading", function() {
 	  .textColor("#FFFFFF");
 });
 
+//
+// Balloon component
+//
+Crafty.c('Balloon', {
+	events: {
+		"EnterFrame": function() { this.tick.apply(this, arguments); }
+	},
+	init: function() {
+		this.requires('2D, WebGL');
+
+		// trigger the Offscreen event if balloon goes offscreen
+		this.bind('Move', function(e) {
+			if(e._y < 0) {
+				this.trigger('Offscreen');
+			}
+		});
+
+	},
+	tick: function(e) {
+		// console.log('tick', e);
+		this.y = this.y-1;
+	}
+});
+
+//
+// Intro gravity scene
+//
 Crafty.defineScene("gravity",function() {
 	Crafty.background("rgb(150,200,255)");
 
-	var dims = getDims();
 
 	// logo
 	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
@@ -35,17 +64,53 @@ Crafty.defineScene("gravity",function() {
 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
 });
 
+
+
+//
+// Simple touch interface scene
+//
+
 Crafty.defineScene("simple-touch", function() {
 	Crafty.background("rgb(150,200,255)");
 
+	// var dims = getDims();
+
+	var balloon;
+
+	function createBalloon() {
+		balloon = Crafty.e('2D, WebGL, Color, Balloon');
+		balloon.color('red');
+		balloon.attr({
+			w: 50,
+			h: 50,
+			x: Math.random()*dims.width,
+			y: dims.height-50
+		});
+
+		// check if balloon is offscreen
+		balloon.bind("Offscreen", function() {
+			console.log('Balloon offscreen');
+			balloon.destroy();
+		});
+
+		balloon.bind("Remove", function() {
+			console.log('Balloon destroyed');
+
+			// create new balloon when balloon is destroyed
+			createBalloon();
+		});
+	}
+
+
+	createBalloon();
 });
 
 function getDims() {
 
-	Crafty.webgl.init();
-
-	// other basic stuff
-	var ctx = Crafty.webgl.context
+	if(!ctx) {
+		Crafty.webgl.init();
+		ctx = Crafty.webgl.context;
+	}
 	return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
 }
 
@@ -61,5 +126,6 @@ gui.add(params, 'scene', ['gravity', 'simple-touch']).onChange(function(val) {
 
 // load & go!
 Crafty.load(assets, function() {
+	dims = getDims();
 	Crafty.enterScene(params.scene);
 });
