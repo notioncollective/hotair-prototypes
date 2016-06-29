@@ -24,7 +24,10 @@
   },
   "dependencies": {
     "craftyjs": "^0.7.1",
-    "exdat": "^0.6.2"
+    "exdat": "^0.6.2",
+    "hammerjs": "^2.0.8",
+    "keydown": "0.0.3",
+    "swipe-event": "^0.4.2"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
