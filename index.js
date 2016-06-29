@@ -54,8 +54,8 @@ Crafty.c('Balloon', {
 		this.y = this.y-1;
 	},
 	hit: function() {
-		this.destroy();
 		this.trigger('Hit');
+		this.destroy();
 	}
 });
 
@@ -106,7 +106,7 @@ Crafty.defineScene("simple-touch",
 			// check if balloon is offscreen
 			balloon.bind("Offscreen", balloon.destroy);
 			
-			// create new balloon when balloon is destroyed
+			// create new balloon when balloon is hit
 			balloon.bind("Hit", createBalloon);
 
 			balloon.bind('MouseDown', balloon.hit );
