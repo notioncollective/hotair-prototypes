@@ -1,9 +1,13 @@
-var Crafty = require('craftyjs');
+// polyfills
+require('es6-promise').polyfill();
+require('whatwg-fetch');
+
 var keydown = require('keydown');
 var Hammer = require('hammerjs');
 
 // var dat = require('exdat');
 
+console.log('Crafty', Crafty);
 
 var assets = {
 	"images" : "assets/notion_logo.png"
@@ -160,8 +164,18 @@ function previousScene() {
 	Crafty.enterScene(scenes[sceneIndex]);	
 }
 
-// load & go!
-Crafty.load(assets, function() {
+
+var dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
+var assetsPromise = new Promise(function(resolve, reject) {
+	Crafty.load(assets, resolve, null, reject);
+});
+
+Promise.all([dataPromise, assetsPromise]).then(function(data) {
+
+	data = data.length ? data[0] : undefined;
+
+	console.log('loaded!', data);
+
 	dims = getDims();
 	touchEvents = new Hammer(Crafty.stage.elem);
 	Crafty.enterScene(scenes[sceneIndex]);
