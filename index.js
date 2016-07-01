@@ -2,6 +2,8 @@
 require('es6-promise').polyfill();
 require('whatwg-fetch');
 
+require('./crafty-doubletap')(Crafty);
+
 var keydown = require('keydown');
 var Hammer = require('hammerjs');
 
@@ -26,6 +28,7 @@ var sceneIndex = 0;
 var dims;
 var ctx;
 var touchEvents;
+var tweets;
 
 // loading scene
 Crafty.defineScene("loading", function() {
@@ -40,6 +43,7 @@ Crafty.defineScene("loading", function() {
 // Balloon component
 //
 Crafty.c('Balloon', {
+	_tweet: null,
 	init: function() {
 		this.requires('2D, WebGL');
 
@@ -51,16 +55,19 @@ Crafty.c('Balloon', {
 		});
 
 		// move on every frame
-		this.bind('EnterFrame', this.move)
+		this.bind('EnterFrame', this._move)
 
-	},
-	move: function(e) {
-		this.y = this.y-1;
 	},
 	hit: function() {
 		this.trigger('Hit');
 		this.destroy();
-	}
+	},
+	setTweet: function(obj) {
+		this._tweet = obj;
+	},
+	_move: function(e) {
+		this.y = this.y-1;
+	},
 });
 
 //
@@ -102,10 +109,11 @@ Crafty.defineScene("simple-touch",
 		var balloon;
 
 		function createBalloon() {
-			balloon = Crafty.e('2D, WebGL, Color, Touch, Mouse, Balloon');
+			balloon = Crafty.e('2D, WebGL, Color, Touch, Mouse, Balloon, DoubleTap');
 			balloon
 				.color('red')
 				.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
+				.setTweet(getNextTweet());
 
 			// check if balloon is offscreen
 			balloon.bind("Offscreen", balloon.destroy);
@@ -113,8 +121,8 @@ Crafty.defineScene("simple-touch",
 			// create new balloon when balloon is hit
 			balloon.bind("Hit", createBalloon);
 
-			balloon.bind('MouseDown', balloon.hit );
-			balloon.bind('TouchDown', balloon.hit );
+			balloon.bind('DoubleClick', balloon.hit );
+			balloon.bind('DoubleTap', balloon.hit );
 
 		}
 
@@ -138,12 +146,9 @@ function getDims() {
 
 // setup crafty
 Crafty.init();
+Crafty.multitouch(true);
 Crafty.enterScene("loading");
 
-// var gui = new dat.GUI();
-// gui.add(params, 'scene', ['gravity', 'simple-touch']).onChange(function(val) {
-// 	Crafty.enterScene(val);
-// });
 
 
 function nextScene() {
@@ -164,6 +169,9 @@ function previousScene() {
 	Crafty.enterScene(scenes[sceneIndex]);	
 }
 
+function getNextTweet() {
+	return tweets[Math.floor(Math.random()*tweets.length)];
+}
 
 var dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
 var assetsPromise = new Promise(function(resolve, reject) {
@@ -173,8 +181,8 @@ var assetsPromise = new Promise(function(resolve, reject) {
 Promise.all([dataPromise, assetsPromise]).then(function(data) {
 
 	data = data.length ? data[0] : undefined;
+	tweets = data.rows;
 
-	console.log('loaded!', data);
 
 	dims = getDims();
 	touchEvents = new Hammer(Crafty.stage.elem);
