@@ -43,9 +43,8 @@ Crafty.defineScene("loading", function() {
 // Balloon component
 //
 Crafty.c('Balloon', {
-	_tweet: null,
+	required: '2D, WebGL, Touch, Mouse',
 	init: function() {
-		this.requires('2D, WebGL');
 
 		// trigger the Offscreen event if balloon goes offscreen
 		this.bind('Move', function(e) {
@@ -62,12 +61,15 @@ Crafty.c('Balloon', {
 		this.trigger('Hit');
 		this.destroy();
 	},
-	setTweet: function(obj) {
-		this._tweet = obj;
-	},
 	_move: function(e) {
 		this.y = this.y-1;
 	},
+});
+
+Crafty.c("TweetText", {
+	require: '2D, Text',
+	init: function() {
+	}
 });
 
 //
@@ -108,12 +110,21 @@ Crafty.defineScene("simple-touch",
 
 		var balloon;
 
+		var tweetText = Crafty.e('2D, DOM, Text, TweetText')
+					.attr({x: 20, y: 20})
+					.textColor('#ffffff')
+		
+
 		function createBalloon() {
-			balloon = Crafty.e('2D, WebGL, Color, Touch, Mouse, Balloon, DoubleTap');
+			console.log('Create balloon!');
+			balloon = Crafty.e('2D, WebGL, Touch, Mouse, Color, Balloon, DoubleTap');
 			balloon
 				.color('red')
 				.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
-				.setTweet(getNextTweet());
+
+			var text = getNextTweet().value.text;
+			console.log('set tweet text', text);
+			tweetText.text(text);
 
 			// check if balloon is offscreen
 			balloon.bind("Offscreen", balloon.destroy);
@@ -123,6 +134,9 @@ Crafty.defineScene("simple-touch",
 
 			balloon.bind('DoubleClick', balloon.hit );
 			balloon.bind('DoubleTap', balloon.hit );
+
+			balloon.bind('MouseDown', balloon.showTweet);
+			balloon.bind('TouchDown', balloon.showTweet);
 
 		}
 
