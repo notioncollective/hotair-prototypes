@@ -57,12 +57,21 @@ Crafty.c('Balloon', {
 		this.bind('EnterFrame', this._move)
 
 	},
+	attachText: function(text) {
+		this.text = text;
+
+		this.text.x = this.x + this.w + 10;
+		this.text.y = this.y;
+	},
 	hit: function() {
 		this.trigger('Hit');
 		this.destroy();
 	},
 	_move: function(e) {
 		this.y = this.y-1;
+		if(this.text) {
+			this.text.y = this.y;
+		}
 	},
 });
 
@@ -111,8 +120,12 @@ Crafty.defineScene("simple-touch",
 		var balloon;
 
 		var tweetText = Crafty.e('2D, DOM, Text, TweetText')
-					.attr({x: 20, y: 20})
-					.textColor('#ffffff')
+					.attr({x: 20, y: 20, w: 200})
+					.textFont({
+						size: '11px',
+						family: 'Courier'
+					})
+					.textColor('#000000')
 		
 
 		function createBalloon() {
@@ -125,6 +138,8 @@ Crafty.defineScene("simple-touch",
 			var text = getNextTweet().value.text;
 			console.log('set tweet text', text);
 			tweetText.text(text);
+
+			balloon.attachText(tweetText);
 
 			// check if balloon is offscreen
 			balloon.bind("Offscreen", balloon.destroy);
