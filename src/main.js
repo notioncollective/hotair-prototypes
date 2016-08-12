@@ -21,15 +21,16 @@ module.exports = function(Crafty) {
 		scene: 'simple-touch'
 	}
 	var scenes = [
-		'simple-touch',
-		'gravity',
+		'simple-touch'//,
+		// 'gravity'
 	];
 	var sceneIndex = 0;
 	var dims;
 	var ctx;
 	var touchEvents;
 	var tweets;
-
+	var dataPromise;
+	var assetsPromise;
 
 
 	//
@@ -47,9 +48,7 @@ module.exports = function(Crafty) {
 		  .textColor("#FFFFFF");
 	});
 
-	//
 	// Intro gravity scene
-	//
 	Crafty.defineScene("gravity",
 		function init() {
 		Crafty.background("rgb(150,200,255)");
@@ -71,17 +70,12 @@ module.exports = function(Crafty) {
 		}
 	);
 
-	//
 	// Simple touch interface scene
-	//
 	Crafty.defineScene("simple-touch",
 		function init() {
 			Crafty.background("rgb(150,200,255)");
-
-			// var dims = getDims();
-
+			
 			var balloon;
-
 			var tweetText = Crafty.e('2D, DOM, Text')
 						.attr({x: 20, y: 20, w: 200})
 			
@@ -119,22 +113,17 @@ module.exports = function(Crafty) {
 		}
 	);
 
-	function getDims() {
+	//
+	// HELPER FUNCTIONS
+	// 
 
+	function getDims() {
 		if(!ctx) {
 			Crafty.webgl.init();
 			ctx = Crafty.webgl.context;
 		}
 		return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
 	}
-
-
-	// setup crafty
-	Crafty.init();
-	Crafty.multitouch(true);
-	Crafty.enterScene("loading");
-
-
 
 	function nextScene() {
 		if(sceneIndex+1 < scenes.length) {
@@ -162,11 +151,19 @@ module.exports = function(Crafty) {
 	//
 	// LOADING & INITIALIZATION
 	//
-	var dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
-	var assetsPromise = new Promise(function(resolve, reject) {
+
+	// setup crafty
+	Crafty.init();
+	Crafty.multitouch(true);
+	Crafty.enterScene("loading");
+
+	// loading promises
+	dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
+	assetsPromise = new Promise(function(resolve, reject) {
 		Crafty.load(assets, resolve, null, reject);
 	});
 
+	// loading
 	Promise.all([dataPromise, assetsPromise]).then(function(data) {
 
 		data = data.length ? data[0] : undefined;
