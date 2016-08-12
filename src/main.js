@@ -2,53 +2,49 @@
 require('es6-promise').polyfill();
 require('whatwg-fetch');
 
+// deps
+var keydown = require('keydown');
+var Hammer = require('hammerjs');
 
 module.exports = function(Crafty) {
 
 	// components
 	require('./doubletap')(Crafty);
 	require('./balloon')(Crafty);
+	require('./tweet-text')(Crafty);
 
-	var keydown = require('keydown');
-	var Hammer = require('hammerjs');
-
-	// var dat = require('exdat');
-
-	console.log('Crafty', Crafty);
-
+	// vars 
 	var assets = {
 		"images" : "assets/notion_logo.png"
 	};
-
 	var params = {
 		scene: 'simple-touch'
 	}
-
 	var scenes = [
 		'simple-touch',
 		'gravity',
 	];
 	var sceneIndex = 0;
-
 	var dims;
 	var ctx;
 	var touchEvents;
 	var tweets;
 
+
+
+	//
+	// SCENES
+	// 
+	
+	//
 	// loading scene
+	// 
 	Crafty.defineScene("loading", function() {
 		Crafty.background("#000");
 	  Crafty.e("2D, Canvas, Text")
 		  .attr({ w: 100, h: 20, x: 150, y: 120 })
 		  .text("Loading")
 		  .textColor("#FFFFFF");
-	});
-
-
-	Crafty.c("TweetText", {
-		require: '2D, Text',
-		init: function() {
-		}
 	});
 
 	//
@@ -75,12 +71,9 @@ module.exports = function(Crafty) {
 		}
 	);
 
-
-
 	//
 	// Simple touch interface scene
 	//
-
 	Crafty.defineScene("simple-touch",
 		function init() {
 			Crafty.background("rgb(150,200,255)");
@@ -89,25 +82,18 @@ module.exports = function(Crafty) {
 
 			var balloon;
 
-			var tweetText = Crafty.e('2D, DOM, Text, TweetText')
+			var tweetText = Crafty.e('2D, DOM, Text')
 						.attr({x: 20, y: 20, w: 200})
-						.textFont({
-							size: '11px',
-							family: 'Courier'
-						})
-						.textColor('#000000')
 			
 
 			function createBalloon() {
 				console.log('Create balloon!');
-				balloon = Crafty.e('2D, WebGL, Touch, Mouse, Color, Balloon, DoubleTap');
+				balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
 					.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
 
-				var text = getNextTweet().value.text;
-				console.log('set tweet text', text);
-				tweetText.text(text);
+				tweetText.text(getNextTweet().value.text);
 
 				balloon.attachText(tweetText);
 
@@ -172,6 +158,10 @@ module.exports = function(Crafty) {
 		return tweets[Math.floor(Math.random()*tweets.length)];
 	}
 
+
+	//
+	// LOADING & INITIALIZATION
+	//
 	var dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
 	var assetsPromise = new Promise(function(resolve, reject) {
 		Crafty.load(assets, resolve, null, reject);

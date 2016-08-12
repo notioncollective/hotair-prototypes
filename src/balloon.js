@@ -3,8 +3,9 @@
 //
 module.exports = function(Crafty) {
 	Crafty.c('Balloon', {
-		required: '2D, WebGL, Touch, Mouse',
 		init: function() {
+			// set requirements
+			this.requires('2D, WebGL, Touch, Mouse, Color, DoubleTap');
 
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Move', function(e) {
