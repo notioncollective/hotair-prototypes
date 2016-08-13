@@ -1,6 +1,6 @@
 {
   "name": "hotair-prototypes",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Prototyping for Hot Air game.",
   "main": "index.js",
   "license": "MIT",
