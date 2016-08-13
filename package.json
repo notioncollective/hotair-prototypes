@@ -1,7 +1,7 @@
 {
-  "name": "crafty-webgl-test",
-  "version": "0.0.3",
-  "description": "",
+  "name": "hotair-prototypes",
+  "version": "0.0.5",
+  "description": "Prototyping for Hot Air game.",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -11,11 +11,18 @@
     "deploy": "npm run build; gh-pages -d dist; npm run clean",
     "clean": "rm -r dist"
   },
-  "author": {
-    "name": "Andy Dayton",
-    "email": "amdayton@gmail.com",
-    "url": "http://andydayton.com/"
-  },
+  "contributors": [
+    {
+      "name": "Andy Dayton",
+      "email": "amdayton@gmail.com",
+      "url": "http://andydayton.com/"
+    },
+    {
+      "name": "Jonathan Wohl",
+      "email": "jon@jonwohl.com",
+      "url": "http://jonathanwohl.com/"
+    }
+  ],
   "browser": {
     "craftyjs": "./node_modules/craftyjs/src/crafty.js"
   },
@@ -40,7 +47,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/andyinabox/crafty-webgl-test.git"
+    "url": "git://github.com/notioncollective/hotair-prototypes.git"
   },
-  "homepage": "https://github.com/andyinabox/crafty-webgl-test"
+  "homepage": "https://github.com/notioncollective/hotair-prototypes"
 }
