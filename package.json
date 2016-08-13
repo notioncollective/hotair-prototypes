@@ -30,6 +30,7 @@
     "craftyjs": "global:Crafty"
   },
   "dependencies": {
+    "browser-size": "^0.1.0",
     "craftyjs": "^0.7.1",
     "es6-promise": "^3.2.1",
     "exdat": "^0.6.2",

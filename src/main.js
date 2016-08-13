@@ -5,6 +5,9 @@ require('whatwg-fetch');
 // deps
 var keydown = require('keydown');
 var Hammer = require('hammerjs');
+var browserSize = require('browser-size')();
+
+var MAX_GAME_WIDTH = 600;
 
 module.exports = function(Crafty) {
 
@@ -27,6 +30,7 @@ module.exports = function(Crafty) {
 	var sceneIndex = 0;
 	var dims;
 	var ctx;
+	var gameWidth;
 	var touchEvents;
 	var tweets;
 	var dataPromise;
@@ -153,7 +157,17 @@ module.exports = function(Crafty) {
 	//
 
 	// setup crafty
-	Crafty.init();
+	
+
+	// limit width of game
+	if(browserSize.width > MAX_GAME_WIDTH) {
+		gameWidth = MAX_GAME_WIDTH;
+	}
+
+
+	console.log('gameWidth', gameWidth, browserSize.width, MAX_GAME_WIDTH);
+
+	Crafty.init(gameWidth);
 	Crafty.multitouch(true);
 	Crafty.enterScene("loading");
 
@@ -166,11 +180,11 @@ module.exports = function(Crafty) {
 	// loading
 	Promise.all([dataPromise, assetsPromise]).then(function(data) {
 
+		dims = getDims();
+
 		data = data.length ? data[0] : undefined;
 		tweets = data.rows;
 
-
-		dims = getDims();
 		touchEvents = new Hammer(Crafty.stage.elem);
 		Crafty.enterScene(scenes[sceneIndex]);
 

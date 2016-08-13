@@ -1,4 +1,16 @@
 body {
 	margin: 0;
 	padding: 0;
+
+	background: #ddd;
+  background: -webkit-gradient(linear, left top, right top, from(#fff), color-stop(0.5, #ddd), to(#fff));
+  background: -webkit-linear-gradient(left, #fff, #ccc, #fff);
+  background: -moz-linear-gradient(left, #fff, #ccc, #fff);
+  background: -ms-linear-gradient(left, #fff, #ccc, #fff);
+  background: -o-linear-gradient(left, #fff, #ccc, #fff);
+  background: linear-gradient(left, #fff, #ccc, #fff);
+}
+
+#cr-stage {
+	margin: 0 auto;
 }
