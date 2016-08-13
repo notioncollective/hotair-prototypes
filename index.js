@@ -1,276 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = function(Crafty) {
-	Crafty.c("DoubleTap", {
-		required: 'Touch',
-
-		_thresh: 300,
-		_timeout: null,
-
-		init: function() {
-			if(!this.thresh) {
-				this.thresh = this._thresh;
-			}
-			this.bind("TouchStart", this._tap);
-		},
-
-		doubleTapThreshold: function(millis) {
-			this.thresh = millis;
-		},
-
-		_tap: function() {
-			var args = Array.prototype.slice.call(arguments);
-
-			if(this._timeout) {
-
-				// clone args and set event type
-				args.unshift("DoubleTap");
-
-				// trigger event
-				this.trigger.apply(this, args);
-
-				// clear the timeout
-				window.clearTimeout(this._timeout);
-			} else {
-
-				// set timeout
-				this._timeout = window.setTimeout(function(){
-					this._timeout = null;
-				}.bind(this), this._thresh);
-			}
-		}
-	});	
-}
-
-},{}],2:[function(require,module,exports){
-// polyfills
-require('es6-promise').polyfill();
-require('whatwg-fetch');
-
-require('./crafty-doubletap')(Crafty);
-
-var keydown = require('keydown');
-var Hammer = require('hammerjs');
-
-// var dat = require('exdat');
-
-console.log('Crafty', Crafty);
-
-var assets = {
-	"images" : "assets/notion_logo.png"
-};
-
-var params = {
-	scene: 'simple-touch'
-}
-
-var scenes = [
-	'gravity',
-	'simple-touch'
-];
-var sceneIndex = 0;
-
-var dims;
-var ctx;
-var touchEvents;
-var tweets;
-
-// loading scene
-Crafty.defineScene("loading", function() {
-	Crafty.background("#000");
-  Crafty.e("2D, Canvas, Text")
-	  .attr({ w: 100, h: 20, x: 150, y: 120 })
-	  .text("Loading")
-	  .textColor("#FFFFFF");
-});
-
-//
-// Balloon component
-//
-Crafty.c('Balloon', {
-	required: '2D, WebGL, Touch, Mouse',
-	init: function() {
-
-		// trigger the Offscreen event if balloon goes offscreen
-		this.bind('Move', function(e) {
-			if(e._y < 0) {
-				this.trigger('Offscreen');
-			}
-		});
-
-		// move on every frame
-		this.bind('EnterFrame', this._move)
-
-	},
-	attachText: function(text) {
-		this.text = text;
-
-		this.text.x = this.x + this.w + 10;
-		this.text.y = this.y;
-	},
-	hit: function() {
-		this.trigger('Hit');
-		this.destroy();
-	},
-	_move: function(e) {
-		this.y = this.y-1;
-		if(this.text) {
-			this.text.y = this.y;
-		}
-	},
-});
-
-Crafty.c("TweetText", {
-	require: '2D, Text',
-	init: function() {
-	}
-});
-
-//
-// Intro gravity scene
-//
-Crafty.defineScene("gravity",
-	function init() {
-	Crafty.background("rgb(150,200,255)");
-
-
-	// logo
-	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
-		.image('assets/notion_logo.png')
-		.gravity('2D');
-	  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
-
-	// bottom platform
-	var platform = Crafty.e('2D, WebGL, Color')
-									.color(0, 255, 100, 1)
-									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
-	},
-	function uninit() {
-		Crafty('2D').get().forEach(function(e) { e.destroy(); });
-	}
-);
-
-
-
-//
-// Simple touch interface scene
-//
-
-Crafty.defineScene("simple-touch",
-	function init() {
-		Crafty.background("rgb(150,200,255)");
-
-		// var dims = getDims();
-
-		var balloon;
-
-		var tweetText = Crafty.e('2D, DOM, Text, TweetText')
-					.attr({x: 20, y: 20, w: 200})
-					.textFont({
-						size: '11px',
-						family: 'Courier'
-					})
-					.textColor('#000000')
-		
-
-		function createBalloon() {
-			console.log('Create balloon!');
-			balloon = Crafty.e('2D, WebGL, Touch, Mouse, Color, Balloon, DoubleTap');
-			balloon
-				.color('red')
-				.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
-
-			var text = getNextTweet().value.text;
-			console.log('set tweet text', text);
-			tweetText.text(text);
-
-			balloon.attachText(tweetText);
-
-			// check if balloon is offscreen
-			balloon.bind("Offscreen", balloon.destroy);
-			
-			// create new balloon when balloon is hit
-			balloon.bind("Hit", createBalloon);
-
-			balloon.bind('DoubleClick', balloon.hit );
-			balloon.bind('DoubleTap', balloon.hit );
-
-			balloon.bind('MouseDown', balloon.showTweet);
-			balloon.bind('TouchDown', balloon.showTweet);
-
-		}
-
-
-		createBalloon();
-	},
-	function uninit() {
-		Crafty('2D').get().forEach(function(e) { e.destroy(); });		
-	}
-);
-
-function getDims() {
-
-	if(!ctx) {
-		Crafty.webgl.init();
-		ctx = Crafty.webgl.context;
-	}
-	return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
-}
-
-
-// setup crafty
-Crafty.init();
-Crafty.multitouch(true);
-Crafty.enterScene("loading");
-
-
-
-function nextScene() {
-	if(sceneIndex+1 < scenes.length) {
-		sceneIndex++;
-	} else {
-		sceneIndex = 0;
-	}
-	Crafty.enterScene(scenes[sceneIndex]);	
-}
-
-function previousScene() {
-	if(sceneIndex-1 >= 0) {
-		sceneIndex--;
-	} else {
-		sceneIndex = scenes.length-1;
-	}
-	Crafty.enterScene(scenes[sceneIndex]);	
-}
-
-function getNextTweet() {
-	return tweets[Math.floor(Math.random()*tweets.length)];
-}
-
-var dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
-var assetsPromise = new Promise(function(resolve, reject) {
-	Crafty.load(assets, resolve, null, reject);
-});
-
-Promise.all([dataPromise, assetsPromise]).then(function(data) {
-
-	data = data.length ? data[0] : undefined;
-	tweets = data.rows;
-
-
-	dims = getDims();
-	touchEvents = new Hammer(Crafty.stage.elem);
-	Crafty.enterScene(scenes[sceneIndex]);
-
-	// touch events
-	touchEvents.on('swipeleft', previousScene);
-	touchEvents.on('swiperight', nextScene);
-
-	// mouse events
-	keydown('<left>').on('pressed', previousScene);
-	keydown('<right>').on('pressed', nextScene);
-
-});
-},{"./crafty-doubletap":1,"es6-promise":5,"hammerjs":6,"keydown":7,"whatwg-fetch":9}],3:[function(require,module,exports){
+require('./src/main')(Crafty);
+},{"./src/main":11}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -570,7 +300,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -666,7 +396,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -1629,7 +1359,7 @@ process.umask = function() { return 0; };
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":4}],6:[function(require,module,exports){
+},{"_process":3}],5:[function(require,module,exports){
 /*! Hammer.JS - v2.0.7 - 2016-04-22
  * http://hammerjs.github.io/
  *
@@ -4274,7 +4004,7 @@ if (typeof define === 'function' && define.amd) {
 
 })(window, document, 'Hammer');
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var Emitter = require('events').EventEmitter
 var vkey = require('vkey')
 
@@ -4314,7 +4044,7 @@ module.exports = function(keys, el) {
   return emitter
 }
 
-},{"events":3,"vkey":8}],8:[function(require,module,exports){
+},{"events":2,"vkey":7}],7:[function(require,module,exports){
 var ua = typeof window !== 'undefined' ? window.navigator.userAgent : ''
   , isOSX = /OS X/.test(ua)
   , isOpera = /Opera/.test(ua)
@@ -4452,7 +4182,7 @@ for(i = 112; i < 136; ++i) {
   output[i] = 'F'+(i-111)
 }
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function(self) {
   'use strict';
 
@@ -4887,4 +4617,280 @@ for(i = 112; i < 136; ++i) {
   self.fetch.polyfill = true
 })(typeof self !== 'undefined' ? self : this);
 
-},{}]},{},[2]);
+},{}],9:[function(require,module,exports){
+//
+// Balloon component
+//
+module.exports = function(Crafty) {
+	Crafty.c('Balloon', {
+		init: function() {
+			// set requirements
+			this.requires('2D, WebGL, Touch, Mouse, Color, DoubleTap');
+
+			// trigger the Offscreen event if balloon goes offscreen
+			this.bind('Move', function(e) {
+				if(e._y < 0) {
+					this.trigger('Offscreen');
+				}
+			});
+
+			// move on every frame
+			this.bind('EnterFrame', this._move)
+
+		},
+		attachText: function(text) {
+			this.text = text;
+			this.text.x = this.x + this.w + 10;
+			this.text.y = this.y;
+		},
+		hit: function() {
+			this.trigger('Hit');
+			this.destroy();
+		},
+		_move: function(e) {
+			this.y = this.y-1;
+			if(this.text) {
+				this.text.y = this.y;
+			}
+		},
+	})
+};
+},{}],10:[function(require,module,exports){
+module.exports = function(Crafty) {
+	Crafty.c("DoubleTap", {
+		required: 'Touch',
+
+		_thresh: 300,
+		_timeout: null,
+
+		init: function() {
+			if(!this.thresh) {
+				this.thresh = this._thresh;
+			}
+			this.bind("TouchStart", this._tap);
+		},
+
+		doubleTapThreshold: function(millis) {
+			this.thresh = millis;
+		},
+
+		_tap: function() {
+			var args = Array.prototype.slice.call(arguments);
+
+			if(this._timeout) {
+
+				// clone args and set event type
+				args.unshift("DoubleTap");
+
+				// trigger event
+				this.trigger.apply(this, args);
+
+				// clear the timeout
+				window.clearTimeout(this._timeout);
+			} else {
+
+				// set timeout
+				this._timeout = window.setTimeout(function(){
+					this._timeout = null;
+				}.bind(this), this._thresh);
+			}
+		}
+	});	
+}
+
+},{}],11:[function(require,module,exports){
+// polyfills
+require('es6-promise').polyfill();
+require('whatwg-fetch');
+
+// deps
+var keydown = require('keydown');
+var Hammer = require('hammerjs');
+
+module.exports = function(Crafty) {
+
+	// components
+	require('./doubletap')(Crafty);
+	require('./balloon')(Crafty);
+	require('./tweet-text')(Crafty);
+
+	// vars 
+	var assets = {
+		"images" : "assets/notion_logo.png"
+	};
+	var params = {
+		scene: 'simple-touch'
+	}
+	var scenes = [
+		'simple-touch'//,
+		// 'gravity'
+	];
+	var sceneIndex = 0;
+	var dims;
+	var ctx;
+	var touchEvents;
+	var tweets;
+	var dataPromise;
+	var assetsPromise;
+
+
+	//
+	// SCENES
+	// 
+	
+	//
+	// loading scene
+	// 
+	Crafty.defineScene("loading", function() {
+		Crafty.background("#000");
+	  Crafty.e("2D, Canvas, Text")
+		  .attr({ w: 100, h: 20, x: 150, y: 120 })
+		  .text("Loading")
+		  .textColor("#FFFFFF");
+	});
+
+	// Intro gravity scene
+	Crafty.defineScene("gravity",
+		function init() {
+		Crafty.background("rgb(150,200,255)");
+
+
+		// logo
+		var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
+			.image('assets/notion_logo.png')
+			.gravity('2D');
+		  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
+
+		// bottom platform
+		var platform = Crafty.e('2D, WebGL, Color')
+										.color(0, 255, 100, 1)
+										.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
+		},
+		function uninit() {
+			Crafty('2D').get().forEach(function(e) { e.destroy(); });
+		}
+	);
+
+	// Simple touch interface scene
+	Crafty.defineScene("simple-touch",
+		function init() {
+			Crafty.background("rgb(150,200,255)");
+			
+			var balloon;
+			var tweetText = Crafty.e('2D, DOM, Text')
+						.attr({x: 20, y: 20, w: 200})
+			
+
+			function createBalloon() {
+				console.log('Create balloon!');
+				balloon = Crafty.e('Balloon');
+				balloon
+					.color('red')
+					.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
+
+				tweetText.text(getNextTweet().value.text);
+
+				balloon.attachText(tweetText);
+
+				// check if balloon is offscreen
+				balloon.bind("Offscreen", balloon.destroy);
+				
+				// create new balloon when balloon is hit
+				balloon.bind("Hit", createBalloon);
+
+				balloon.bind('DoubleClick', balloon.hit );
+				balloon.bind('DoubleTap', balloon.hit );
+
+				balloon.bind('MouseDown', balloon.showTweet);
+				balloon.bind('TouchDown', balloon.showTweet);
+
+			}
+
+
+			createBalloon();
+		},
+		function uninit() {
+			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
+		}
+	);
+
+	//
+	// HELPER FUNCTIONS
+	// 
+
+	function getDims() {
+		if(!ctx) {
+			Crafty.webgl.init();
+			ctx = Crafty.webgl.context;
+		}
+		return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
+	}
+
+	function nextScene() {
+		if(sceneIndex+1 < scenes.length) {
+			sceneIndex++;
+		} else {
+			sceneIndex = 0;
+		}
+		Crafty.enterScene(scenes[sceneIndex]);	
+	}
+
+	function previousScene() {
+		if(sceneIndex-1 >= 0) {
+			sceneIndex--;
+		} else {
+			sceneIndex = scenes.length-1;
+		}
+		Crafty.enterScene(scenes[sceneIndex]);	
+	}
+
+	function getNextTweet() {
+		return tweets[Math.floor(Math.random()*tweets.length)];
+	}
+
+
+	//
+	// LOADING & INITIALIZATION
+	//
+
+	// setup crafty
+	Crafty.init();
+	Crafty.multitouch(true);
+	Crafty.enterScene("loading");
+
+	// loading promises
+	dataPromise = fetch('assets/tweets.json').then(function(r) { return r.json() });
+	assetsPromise = new Promise(function(resolve, reject) {
+		Crafty.load(assets, resolve, null, reject);
+	});
+
+	// loading
+	Promise.all([dataPromise, assetsPromise]).then(function(data) {
+
+		data = data.length ? data[0] : undefined;
+		tweets = data.rows;
+
+
+		dims = getDims();
+		touchEvents = new Hammer(Crafty.stage.elem);
+		Crafty.enterScene(scenes[sceneIndex]);
+
+		// touch events
+		touchEvents.on('swipeleft', previousScene);
+		touchEvents.on('swiperight', nextScene);
+
+		// mouse events
+		keydown('<left>').on('pressed', previousScene);
+		keydown('<right>').on('pressed', nextScene);
+
+	});
+};
+},{"./balloon":9,"./doubletap":10,"./tweet-text":12,"es6-promise":4,"hammerjs":5,"keydown":6,"whatwg-fetch":8}],12:[function(require,module,exports){
+module.exports = function(Crafty) {
+	Crafty.c("TweetText", {
+		init: function() {
+			this.requires('2D, DOM, Text');
+		}
+	});
+}
+},{}]},{},[1]);
