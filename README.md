@@ -1,5 +1,8 @@
-# crafty-webgl-test
+# Hot Air Prototypes
 
+Prototyping for [Hot Air game](http://hotairgame.com). Swipe left/right to switch between prototypes on mobile, use left/right arrow keys on desktop.
+
+http://notioncollective.github.io/hotair-prototypes/
 
 ## Workflow
 
