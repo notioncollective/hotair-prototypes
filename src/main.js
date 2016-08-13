@@ -7,8 +7,6 @@ var keydown = require('keydown');
 var Hammer = require('hammerjs');
 var browserSize = require('browser-size')();
 
-var MAX_GAME_WIDTH = 600;
-
 module.exports = function(Crafty) {
 
 	// components
@@ -160,12 +158,9 @@ module.exports = function(Crafty) {
 	
 
 	// limit width of game
-	if(browserSize.width > MAX_GAME_WIDTH) {
-		gameWidth = MAX_GAME_WIDTH;
+	if(browserSize.width > browserSize.height) {
+		gameWidth = browserSize.height*(.9);
 	}
-
-
-	console.log('gameWidth', gameWidth, browserSize.width, MAX_GAME_WIDTH);
 
 	Crafty.init(gameWidth);
 	Crafty.multitouch(true);
