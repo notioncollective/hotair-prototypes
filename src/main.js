@@ -77,18 +77,21 @@ module.exports = function(Crafty) {
 		function init() {
 			Crafty.background("rgb(150,200,255)");
 			
-			var balloon;
-			var tweetText;
+			// var balloon;
+			// var tweetText;
 
 			function createBalloon() {
 
-				tweetText = Crafty.e('2D, DOM, Text')
-						.attr({x: 20, y: 20, w: 200})
+				var tweetText = Crafty.e('TweetText')
+						.attr({x: 30, y: 30, w: 400})
+						.textFont({ size: '30px' })
+
+				tweetText.hide();
 			
-				balloon = Crafty.e('Balloon');
+				var balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
-					.attr({ w: 50, h: 50, x: Math.random()*dims.width, y: dims.height-50 })
+					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
 
 				tweetText.text(getNextTweet().value.text);
 
@@ -97,22 +100,21 @@ module.exports = function(Crafty) {
 				// check if balloon is offscreen
 				balloon.bind("Offscreen", function() {
 					balloon.destroy();
-					createBalloon();
+					// createBalloon();
 				});
 				
 				// create new balloon when balloon is hit
-				balloon.bind("Hit", createBalloon);
+				// balloon.bind("Hit", createBalloon);
 
-				balloon.bind('DoubleClick', balloon.hit );
-				balloon.bind('DoubleTap', balloon.hit );
+				// balloon.bind('DoubleClick', balloon.hit );
+				// balloon.bind('DoubleTap', balloon.hit );
 
-				balloon.bind('MouseDown', balloon.showTweet);
-				balloon.bind('TouchDown', balloon.showTweet);
+				balloon.bind('MouseDown', balloon.tap);
+				balloon.bind('TouchDown', balloon.tap);
 
 			}
 
-
-			createBalloon();
+			window.setInterval(createBalloon.bind(this), 3000);
 		},
 		function uninit() {
 			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
