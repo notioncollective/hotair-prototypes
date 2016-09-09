@@ -13,15 +13,21 @@ module.exports = function(Crafty) {
 	require('./doubletap')(Crafty);
 	require('./balloon')(Crafty);
 	require('./tweet-text')(Crafty);
+	require('./player')(Crafty);
+	require('./dart')(Crafty);
 
 	// vars 
 	var assets = {
 		"images" : "assets/notion_logo.png"
 	};
 	var params = {
-		scene: 'simple-touch'
+		scene: 'simple-touch',
+		balloonYV: -100,
+		dartYA: 500,
+		dartYV: 200
 	}
 	var scenes = [
+		'player-dart',
 		'simple-touch'//,
 		// 'gravity'
 	];
@@ -77,6 +83,9 @@ module.exports = function(Crafty) {
 		function init() {
 			Crafty.background("rgb(150,200,255)");
 			
+
+			console.log('Scene: simple-touch');
+
 			// var balloon;
 			// var tweetText;
 
@@ -92,6 +101,9 @@ module.exports = function(Crafty) {
 				balloon
 					.color('red')
 					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
+
+				balloon.vy = params.balloonYV;
+
 
 				tweetText.text(getNextTweet().value.text);
 
@@ -112,6 +124,8 @@ module.exports = function(Crafty) {
 				balloon.bind('MouseDown', balloon.tap);
 				balloon.bind('TouchEnd', balloon.tap);
 
+				balloon.bind('Fire', balloon.pop);
+
 			}
 
 			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
@@ -121,6 +135,108 @@ module.exports = function(Crafty) {
 			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
 		}
 	);
+
+
+	// Simple touch interface scene
+	Crafty.defineScene("player-dart",
+		function init() {
+			Crafty.background("rgb(150,200,255)");
+			
+			console.log('Scene: player-dart');
+
+			var player = Crafty.e('Player')
+											.attr({ w: 50, h: 50, y: 10});
+
+
+			player._x = (dims.width/2) - player.w/2;
+
+			// var balloon;
+			// var tweetText;
+
+
+			function shootDart(balloon) {
+
+				var dart = Crafty.e('Dart')
+										.attr({x: player.x + (player.w/2), y: (player.y + player.h), w: 10, h:10})
+
+				dart.ay = params.dartYA;
+				dart.vy = params.dartYV;
+				dart.vx = calculateDartMovement(balloon, player);
+
+			}
+
+			function calculateDartMovement(balloon, player) {
+				var vx;
+
+				vx = (balloon.x + balloon.w/2) - (player.x + player.w/2);
+
+				return vx;
+			}
+
+			function createBalloon() {
+
+				var tweetText = Crafty.e('TweetText')
+						.attr({x: 30, y: 30, w: 400})
+						.textFont({ size: '30px' })
+
+				tweetText.hide();
+			
+				var balloon = Crafty.e('Balloon');
+				balloon
+					.color('red')
+					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
+					.checkHits('Dart');
+
+				balloon.vy = params.balloonYV;
+
+				tweetText.text(getNextTweet().value.text);
+
+				balloon.attachText(tweetText);
+
+				// check if balloon is offscreen
+				balloon.bind("Offscreen", function() {
+					balloon.destroy();
+					// createBalloon();
+				});
+				
+				// create new balloon when balloon is hit
+				// balloon.bind("Hit", createBalloon);
+
+				// balloon.bind('DoubleClick', balloon.hit );
+				// balloon.bind('DoubleTap', balloon.hit );
+
+				balloon.bind('MouseDown', balloon.tap);
+				balloon.bind('TouchEnd', balloon.tap);
+
+				balloon.bind('Fire', shootDart);
+
+				balloon.bind('HitOn', function(data) {
+					console.log(data);
+					var dart = data[0].obj;
+
+					if(balloon.selected) {
+						dart.destroy();
+						balloon.pop();
+					}
+				});
+
+				balloon.bind('SelectOn', function() {
+					Crafty('Balloon').get().forEach(function(e) {
+						if(e.getId() !== balloon.getId()) {
+							e.unSelect();
+						}
+					});
+				});
+			}
+
+			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
+		},
+		function uninit() {
+			window.clearInterval(this.intervalId);
+			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
+		}
+	);
+
 
 	//
 	// HELPER FUNCTIONS
@@ -135,11 +251,16 @@ module.exports = function(Crafty) {
 	}
 
 	function nextScene() {
+
 		if(sceneIndex+1 < scenes.length) {
 			sceneIndex++;
 		} else {
 			sceneIndex = 0;
 		}
+
+		console.log('nextScene', scenes[sceneIndex])
+
+
 		Crafty.enterScene(scenes[sceneIndex]);	
 	}
 
@@ -188,6 +309,9 @@ module.exports = function(Crafty) {
 		tweets = data.rows;
 
 		touchEvents = new Hammer(Crafty.stage.elem);
+
+		console.log(scenes, sceneIndex);
+
 		Crafty.enterScene(scenes[sceneIndex]);
 
 		// touch events

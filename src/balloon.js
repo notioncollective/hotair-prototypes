@@ -5,16 +5,12 @@ module.exports = function(Crafty) {
 	Crafty.c('Balloon', {
 		init: function() {
 			// set requirements
-			this.requires('2D, WebGL, Touch, Mouse, Color, Touch');
+			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion');
 
 			this.selected = false;
 
 			// trigger the Offscreen event if balloon goes offscreen
-			this.bind('Move', function(e) {
-				if(e._y <= 0) {
-					this.trigger('Offscreen');
-				}
-			});
+			this.bind('Moved', this.onMove);
 
 			// move on every frame
 			this.bind('EnterFrame', this._move);
@@ -33,17 +29,16 @@ module.exports = function(Crafty) {
 			}
 			this.text.y = this.y;
 		},
-		hit: function() {
-			this.trigger('Hit');
+		pop: function() {
+			this.trigger('Hit', this);
 
 			this.destroy();
 		},
 		tap: function() {
-			console.log('tap!');
 			if(!this.selected) {
 				this.select();
 			} else {
-				this.hit();
+				this.trigger('Fire', this);
 			}
 		},
 		select: function() {
@@ -51,12 +46,14 @@ module.exports = function(Crafty) {
 			if(this.text) {
 				this.text.show();
 			}
+			this.trigger('SelectOn', this);
 		},
 		unSelect: function() {
 			this.selected = false;
 			if(this.text) {
 				this.text.hide();
 			}
+			this.trigger('SelectOff', this);
 		},
 		_afterDestoy: function(e) {
 
@@ -64,9 +61,10 @@ module.exports = function(Crafty) {
 				this.text.destroy();
 			}
 		},
-		_move: function(e) {
-			this.y = this.y-3;
-			if(this.text) {
+		onMove: function(e) {
+			if(e._y <= 0) {
+					this.trigger('Offscreen');
+			} else if(this.text) {
 				this.text.y = this.y;
 			}
 		},
