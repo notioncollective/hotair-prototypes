@@ -5231,14 +5231,14 @@ module.exports = function(Crafty) {
 
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Move', function(e) {
-				if(e._y < 0) {
+				if(e._y <= 0) {
 					this.trigger('Offscreen');
 				}
 			});
 
 			// move on every frame
-			this.bind('EnterFrame', this._move)
-
+			this.bind('EnterFrame', this._move);
+			this.bind('Remove', this._destroy);
 		},
 		attachText: function(text) {
 			this.text = text;
@@ -5247,7 +5247,20 @@ module.exports = function(Crafty) {
 		},
 		hit: function() {
 			this.trigger('Hit');
+
+			if(this.text) {
+				console.log('destroy text!', this);
+				this.text.destroy();
+			}
+
 			this.destroy();
+		},
+		_destroy: function(e) {
+			console.log('destroy', e, this)
+
+			if(this.text) {
+				this.text.destroy();
+			}
 		},
 		_move: function(e) {
 			this.y = this.y-1;
@@ -5354,26 +5367,26 @@ module.exports = function(Crafty) {
 	});
 
 	// Intro gravity scene
-	Crafty.defineScene("gravity",
-		function init() {
-		Crafty.background("rgb(150,200,255)");
+	// Crafty.defineScene("gravity",
+	// 	function init() {
+	// 	Crafty.background("rgb(150,200,255)");
 
 
-		// logo
-		var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
-			.image('assets/notion_logo.png')
-			.gravity('2D');
-		  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
+	// 	// logo
+	// 	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
+	// 		.image('assets/notion_logo.png')
+	// 		.gravity('2D');
+	// 	  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
 
-		// bottom platform
-		var platform = Crafty.e('2D, WebGL, Color')
-										.color(0, 255, 100, 1)
-										.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
-		},
-		function uninit() {
-			Crafty('2D').get().forEach(function(e) { e.destroy(); });
-		}
-	);
+	// 	// bottom platform
+	// 	var platform = Crafty.e('2D, WebGL, Color')
+	// 									.color(0, 255, 100, 1)
+	// 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
+	// 	},
+	// 	function uninit() {
+	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
+	// 	}
+	// );
 
 	// Simple touch interface scene
 	Crafty.defineScene("simple-touch",
@@ -5381,12 +5394,13 @@ module.exports = function(Crafty) {
 			Crafty.background("rgb(150,200,255)");
 			
 			var balloon;
-			var tweetText = Crafty.e('2D, DOM, Text')
-						.attr({x: 20, y: 20, w: 200})
-			
+			var tweetText;
 
 			function createBalloon() {
-				console.log('Create balloon!');
+
+				tweetText = Crafty.e('2D, DOM, Text')
+						.attr({x: 20, y: 20, w: 200})
+			
 				balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
@@ -5397,7 +5411,10 @@ module.exports = function(Crafty) {
 				balloon.attachText(tweetText);
 
 				// check if balloon is offscreen
-				balloon.bind("Offscreen", balloon.destroy);
+				balloon.bind("Offscreen", function() {
+					balloon.destroy();
+					createBalloon();
+				});
 				
 				// create new balloon when balloon is hit
 				balloon.bind("Hit", createBalloon);
