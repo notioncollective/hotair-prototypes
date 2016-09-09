@@ -194,8 +194,6 @@ module.exports = function(Crafty) {
 
 				dart.vx =  vx; // (sign(vx)) * Math.min(Math.abs(vx), params.dartMaxXV);
 
-				console.log(dart.vx)
-
 			}
 
 			// function calculateDartMovement(balloon, player) {
@@ -208,6 +206,9 @@ module.exports = function(Crafty) {
 
 			function createBalloon() {
 
+				var balloonSize = 150;
+				var bx = (Math.random()*(dims.width-balloonSize))+balloonSize/2;
+
 				var tweetText = Crafty.e('TweetText')
 						.attr({x: 30, y: 30, w: 400})
 						.textFont({ size: '30px' })
@@ -217,7 +218,7 @@ module.exports = function(Crafty) {
 				var balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
-					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
+					.attr({ w: balloonSize, h: balloonSize, x: bx, y: dims.height-50 })
 					.checkHits('Dart');
 
 				balloon.vy = params.balloonYV;
@@ -244,7 +245,6 @@ module.exports = function(Crafty) {
 				balloon.bind('Fire', shootDart);
 
 				balloon.bind('HitOn', function(data) {
-					console.log(data);
 					var dart = data[0].obj;
 
 					// if(balloon.selected) {
