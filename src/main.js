@@ -6,6 +6,7 @@ require('whatwg-fetch');
 var keydown = require('keydown');
 var Hammer = require('hammerjs');
 var browserSize = require('browser-size')();
+var dat = require('exdat');
 
 module.exports = function(Crafty) {
 
@@ -40,6 +41,7 @@ module.exports = function(Crafty) {
 	var dataPromise;
 	var assetsPromise;
 
+	var gui;
 
 	//
 	// SCENES
@@ -303,7 +305,22 @@ module.exports = function(Crafty) {
 	// loading
 	Promise.all([dataPromise, assetsPromise]).then(function(data) {
 
+
+		gui = new dat.GUI();
+
+		gui.add(params, 'balloonYV', -1000, 0);
+		gui.add(params, 'dartYA', 0, 1000);
+		gui.add(params, 'dartYV', 0, 1000);
+
+		dat.GUI.toggleHide();
+
 		dims = getDims();
+
+		Crafty.bind('KeyDown', function(e) {
+			if(e.key === Crafty.keys.G) {
+				dat.GUI.toggleHide();
+			}
+		});
 
 		data = data.length ? data[0] : undefined;
 		tweets = data.rows;
