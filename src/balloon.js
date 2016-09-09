@@ -9,14 +9,14 @@ module.exports = function(Crafty) {
 
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Move', function(e) {
-				if(e._y < 0) {
+				if(e._y <= 0) {
 					this.trigger('Offscreen');
 				}
 			});
 
 			// move on every frame
-			this.bind('EnterFrame', this._move)
-
+			this.bind('EnterFrame', this._move);
+			this.bind('Remove', this._destroy);
 		},
 		attachText: function(text) {
 			this.text = text;
@@ -25,7 +25,20 @@ module.exports = function(Crafty) {
 		},
 		hit: function() {
 			this.trigger('Hit');
+
+			if(this.text) {
+				console.log('destroy text!', this);
+				this.text.destroy();
+			}
+
 			this.destroy();
+		},
+		_destroy: function(e) {
+			console.log('destroy', e, this)
+
+			if(this.text) {
+				this.text.destroy();
+			}
 		},
 		_move: function(e) {
 			this.y = this.y-1;
