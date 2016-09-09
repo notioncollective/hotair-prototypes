@@ -110,13 +110,14 @@ module.exports = function(Crafty) {
 				// balloon.bind('DoubleTap', balloon.hit );
 
 				balloon.bind('MouseDown', balloon.tap);
-				balloon.bind('TouchDown', balloon.tap);
+				balloon.bind('TouchEnd', balloon.tap);
 
 			}
 
-			window.setInterval(createBalloon.bind(this), 3000);
+			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
 		},
 		function uninit() {
+			window.clearInterval(this.intervalId);
 			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
 		}
 	);

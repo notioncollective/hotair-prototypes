@@ -5,7 +5,7 @@ module.exports = function(Crafty) {
 	Crafty.c('Balloon', {
 		init: function() {
 			// set requirements
-			this.requires('2D, WebGL, Touch, Mouse, Color, DoubleTap');
+			this.requires('2D, WebGL, Touch, Mouse, Color, Touch');
 
 			this.selected = false;
 
@@ -22,7 +22,15 @@ module.exports = function(Crafty) {
 		},
 		attachText: function(text) {
 			this.text = text;
-			this.text.x = this.x + this.w + 20;
+
+			var margin = 20;
+
+			if((this.x + (this.w / 2)) > (Crafty.viewport._width / 2)) {
+				this.text.css({ 'text-align' : 'right'});
+				this.text.x = this.x - this.text.w - margin;
+			} else {
+				this.text.x = this.x + this.w + margin;
+			}
 			this.text.y = this.y;
 		},
 		hit: function() {

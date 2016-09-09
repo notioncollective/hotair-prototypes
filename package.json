@@ -5,7 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "budo index.js -H localhost --live --open --css styles.css -- -t browserify-shim",
+    "start": "budo index.js -H 0.0.0.0 --live --open --css styles.css -- -t browserify-shim",
     "setup": "npm install; cp ./node_modules/craftyjs/dist/crafty.js ./assets/crafty.js",
     "build": "budo-demo index.js -i assets -c styles.css -m -- -t browserify-shim",
     "deploy": "npm run build; gh-pages -d dist; npm run clean",
