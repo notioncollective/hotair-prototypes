@@ -7,6 +7,12 @@ var keydown = require('keydown');
 var Hammer = require('hammerjs');
 var browserSize = require('browser-size')();
 var dat = require('exdat');
+var quadratic = require('solve-quadratic-equation');
+
+
+function sign(x) {
+    return typeof x === 'number' ? x ? x < 0 ? -1 : 1 : x === x ? 0 : NaN : NaN;
+}
 
 module.exports = function(Crafty) {
 
@@ -25,7 +31,8 @@ module.exports = function(Crafty) {
 		scene: 'simple-touch',
 		balloonYV: -100,
 		dartYA: 500,
-		dartYV: 200
+		dartYV: 200,
+		dartMaxXV: 500
 	}
 	var scenes = [
 		'player-dart',
@@ -161,19 +168,43 @@ module.exports = function(Crafty) {
 				var dart = Crafty.e('Dart')
 										.attr({x: player.x + (player.w/2), y: (player.y + player.h), w: 10, h:10})
 
+				var bx = balloon.x + balloon.w/2;
+				var by = balloon.y + balloon.h/2;
+				var dx = dart.x + dart.w/2;
+				var dy = dart.y + dart.h/2;
+
 				dart.ay = params.dartYA;
 				dart.vy = params.dartYV;
-				dart.vx = calculateDartMovement(balloon, player);
+
+				var roots = quadratic(
+					(.5*dart.ay), // a
+					(dart.vy-balloon.vy), // b
+					(dy - by) // c
+				);
+
+				var t = Math.max(roots[0], roots[1]);
+
+				// window.setTimeout(function() {
+				// 	console.log(balloon.y, dart.y);
+				// }, t*1000);
+
+				// console.log(t);
+				
+				var vx = (bx-dx)/t;
+
+				dart.vx =  vx; // (sign(vx)) * Math.min(Math.abs(vx), params.dartMaxXV);
+
+				console.log(dart.vx)
 
 			}
 
-			function calculateDartMovement(balloon, player) {
-				var vx;
+			// function calculateDartMovement(balloon, player) {
+			// 	var vx;
 
-				vx = (balloon.x + balloon.w/2) - (player.x + player.w/2);
+			// 	vx = (balloon.x + balloon.w/2) - (player.x + player.w/2);
 
-				return vx;
-			}
+			// 	return vx;
+			// }
 
 			function createBalloon() {
 
@@ -216,10 +247,10 @@ module.exports = function(Crafty) {
 					console.log(data);
 					var dart = data[0].obj;
 
-					if(balloon.selected) {
+					// if(balloon.selected) {
 						dart.destroy();
 						balloon.pop();
-					}
+					// }
 				});
 
 				balloon.bind('SelectOn', function() {
@@ -311,6 +342,7 @@ module.exports = function(Crafty) {
 		gui.add(params, 'balloonYV', -1000, 0);
 		gui.add(params, 'dartYA', 0, 1000);
 		gui.add(params, 'dartYV', 0, 1000);
+		gui.add(params, 'dartMaxXV', 0, 1000);
 
 		dat.GUI.toggleHide();
 
