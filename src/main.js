@@ -23,7 +23,7 @@ module.exports = function(Crafty) {
 	require('./player')(Crafty);
 	require('./dart')(Crafty);
 
-	// vars 
+	// vars
 	var assets = {
 		"images" : "assets/notion_logo.png"
 	};
@@ -52,11 +52,11 @@ module.exports = function(Crafty) {
 
 	//
 	// SCENES
-	// 
-	
+	//
+
 	//
 	// loading scene
-	// 
+	//
 	Crafty.defineScene("loading", function() {
 		Crafty.background("#000");
 	  Crafty.e("2D, Canvas, Text")
@@ -80,7 +80,7 @@ module.exports = function(Crafty) {
 	// 	// bottom platform
 	// 	var platform = Crafty.e('2D, WebGL, Color')
 	// 									.color(0, 255, 100, 1)
-	// 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});	
+	// 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});
 	// 	},
 	// 	function uninit() {
 	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
@@ -91,7 +91,7 @@ module.exports = function(Crafty) {
 	Crafty.defineScene("simple-touch",
 		function init() {
 			Crafty.background("rgb(150,200,255)");
-			
+
 
 			console.log('Scene: simple-touch');
 
@@ -105,7 +105,7 @@ module.exports = function(Crafty) {
 						.textFont({ size: '30px' })
 
 				tweetText.hide();
-			
+
 				var balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
@@ -118,20 +118,15 @@ module.exports = function(Crafty) {
 
 				balloon.attachText(tweetText);
 
-				// check if balloon is offscreen
-				balloon.bind("Offscreen", function() {
-					balloon.destroy();
-					// createBalloon();
-				});
-				
 				// create new balloon when balloon is hit
 				// balloon.bind("Hit", createBalloon);
 
 				// balloon.bind('DoubleClick', balloon.hit );
 				// balloon.bind('DoubleTap', balloon.hit );
 
-				balloon.bind('MouseDown', balloon.tap);
-				balloon.bind('TouchEnd', balloon.tap);
+
+
+				// balloon.bind('TouchEnd', balloon.tap);
 
 				balloon.bind('Fire', balloon.pop);
 
@@ -141,7 +136,7 @@ module.exports = function(Crafty) {
 		},
 		function uninit() {
 			window.clearInterval(this.intervalId);
-			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
+			Crafty('2D').get().forEach(function(e) { e.destroy(); });
 		}
 	);
 
@@ -150,7 +145,7 @@ module.exports = function(Crafty) {
 	Crafty.defineScene("player-dart",
 		function init() {
 			Crafty.background("rgb(150,200,255)");
-			
+
 			console.log('Scene: player-dart');
 
 			var player = Crafty.e('Player')
@@ -183,26 +178,11 @@ module.exports = function(Crafty) {
 				);
 
 				var t = Math.max(roots[0], roots[1]);
-
-				// window.setTimeout(function() {
-				// 	console.log(balloon.y, dart.y);
-				// }, t*1000);
-
-				// console.log(t);
-				
 				var vx = (bx-dx)/t;
 
 				dart.vx =  vx; // (sign(vx)) * Math.min(Math.abs(vx), params.dartMaxXV);
 
 			}
-
-			// function calculateDartMovement(balloon, player) {
-			// 	var vx;
-
-			// 	vx = (balloon.x + balloon.w/2) - (player.x + player.w/2);
-
-			// 	return vx;
-			// }
 
 			function createBalloon() {
 
@@ -214,7 +194,7 @@ module.exports = function(Crafty) {
 						.textFont({ size: '30px' })
 
 				tweetText.hide();
-			
+
 				var balloon = Crafty.e('Balloon');
 				balloon
 					.color('red')
@@ -228,29 +208,29 @@ module.exports = function(Crafty) {
 				balloon.attachText(tweetText);
 
 				// check if balloon is offscreen
-				balloon.bind("Offscreen", function() {
-					balloon.destroy();
-					// createBalloon();
-				});
-				
+				// balloon.bind("Offscreen", function() {
+				// 	balloon.destroy();
+				// 	// createBalloon();
+				// });
+
 				// create new balloon when balloon is hit
 				// balloon.bind("Hit", createBalloon);
 
 				// balloon.bind('DoubleClick', balloon.hit );
 				// balloon.bind('DoubleTap', balloon.hit );
 
-				balloon.bind('MouseDown', balloon.tap);
-				balloon.bind('TouchEnd', balloon.tap);
+				// balloon.bind('MouseDown', balloon.tap);
+				// balloon.bind('TouchEnd', balloon.tap);
 
 				balloon.bind('Fire', shootDart);
 
 				balloon.bind('HitOn', function(data) {
 					var dart = data[0].obj;
 
-					// if(balloon.selected) {
+					if (balloon.marked) {
 						dart.destroy();
 						balloon.pop();
-					// }
+					}
 				});
 
 				balloon.bind('SelectOn', function() {
@@ -266,14 +246,14 @@ module.exports = function(Crafty) {
 		},
 		function uninit() {
 			window.clearInterval(this.intervalId);
-			Crafty('2D').get().forEach(function(e) { e.destroy(); });		
+			Crafty('2D').get().forEach(function(e) { e.destroy(); });
 		}
 	);
 
 
 	//
 	// HELPER FUNCTIONS
-	// 
+	//
 
 	function getDims() {
 		if(!ctx) {
@@ -283,7 +263,8 @@ module.exports = function(Crafty) {
 		return { width: ctx.drawingBufferWidth, height: ctx.drawingBufferHeight };
 	}
 
-	function nextScene() {
+	function nextScene(e) {
+		console.log('hammer event', e);
 
 		if(sceneIndex+1 < scenes.length) {
 			sceneIndex++;
@@ -294,16 +275,17 @@ module.exports = function(Crafty) {
 		console.log('nextScene', scenes[sceneIndex])
 
 
-		Crafty.enterScene(scenes[sceneIndex]);	
+		Crafty.enterScene(scenes[sceneIndex]);
 	}
 
 	function previousScene() {
+		console.log('hammer event', e);
 		if(sceneIndex-1 >= 0) {
 			sceneIndex--;
 		} else {
 			sceneIndex = scenes.length-1;
 		}
-		Crafty.enterScene(scenes[sceneIndex]);	
+		Crafty.enterScene(scenes[sceneIndex]);
 	}
 
 	function getNextTweet() {
@@ -316,12 +298,12 @@ module.exports = function(Crafty) {
 	//
 
 	// setup crafty
-	
+
 
 	// limit width of game
-	if(browserSize.width > browserSize.height) {
-		gameWidth = browserSize.height*(.9);
-	}
+	// if(browserSize.width > browserSize.height) {
+	// 	gameWidth = browserSize.height*(.9);
+	// }
 
 	Crafty.init(gameWidth);
 	Crafty.multitouch(true);
@@ -357,15 +339,38 @@ module.exports = function(Crafty) {
 		data = data.length ? data[0] : undefined;
 		tweets = data.rows;
 
-		touchEvents = new Hammer(Crafty.stage.elem);
+		// touchEvents = new Hammer(Crafty.stage.elem);
+		touchEvents = new Hammer(Crafty.stage.elem, {
+			recognizers: [
+				// RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+				// [Hammer.Rotate],
+				[Hammer.Tap],
+				[Hammer.Swipe,{ direction: Hammer.DIRECTION_ALL }],
+			]
+		});
+		// touchEvents.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
 
 		console.log(scenes, sceneIndex);
 
 		Crafty.enterScene(scenes[sceneIndex]);
 
 		// touch events
-		touchEvents.on('swipeleft', previousScene);
-		touchEvents.on('swiperight', nextScene);
+		// touchEvents.on('swipeleft', previousScene);
+		// touchEvents.on('swiperight', nextScene);
+
+		touchEvents.on('swipeup', function(e) {
+			Crafty.trigger('SwipeUp', e);
+		});
+
+		touchEvents.on('swipedown', function(e) {
+			Crafty.trigger('SwipeDown', e);
+		});
+
+		touchEvents.on('tap', function(e) {
+			Crafty.trigger('Tap', e);
+		});
+
+
 
 		// mouse events
 		keydown('<left>').on('pressed', previousScene);

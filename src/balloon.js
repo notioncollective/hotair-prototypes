@@ -8,9 +8,14 @@ module.exports = function(Crafty) {
 			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion');
 
 			this.selected = false;
+			this.marked = false;
 
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Moved', this.onMove);
+
+			this.bind('SwipeUp', this.onSwipeUp);
+			this.bind('SwipeDown', this.onSwipeDown);
+			this.bind('Tap', this.onTap);
 
 			// move on every frame
 			this.bind('EnterFrame', this._move);
@@ -30,14 +35,16 @@ module.exports = function(Crafty) {
 			this.text.y = this.y;
 		},
 		pop: function() {
-			this.trigger('Hit', this);
-
-			this.destroy();
+			if (this.marked) {
+				this.trigger('Hit', this);
+				this.destroy();
+			}
 		},
 		tap: function() {
 			if(!this.selected) {
 				this.select();
 			} else {
+				this.marked = true;
 				this.trigger('Fire', this);
 			}
 		},
@@ -56,17 +63,44 @@ module.exports = function(Crafty) {
 			this.trigger('SelectOff', this);
 		},
 		_afterDestoy: function(e) {
-
+			console.log('_afterDestoy');
 			if(this.text) {
 				this.text.destroy();
+				// this.unbind('SwipeUp');
+				// this.unbind('SwipeDown');
 			}
 		},
 		onMove: function(e) {
-			if(e._y <= 0) {
-					this.trigger('Offscreen');
+			if(this.y <= -this.h) {
+				console.log('Destroy me!');
+				this.destroy();
 			} else if(this.text) {
 				this.text.y = this.y;
 			}
 		},
+		onSwipeUp: function(e) {
+			console.log('onSwipeUp');
+			if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
+				if (this.selected) {
+					// this.trigger('Fire', this);
+					this.vy = -1000;
+					this.ay = -1000;
+				}
+			}
+		},
+		onSwipeDown: function(e) {
+			console.log('onSwipeDown');
+			if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
+				this.tap();
+			}
+		},
+		onTap: function(e) {
+			var dist = Crafty.math.distance(e.center.x, e.center.y, this.x + this.w/2, this.y + this.h/2);
+			console.log('onTap', e.center, dist, this.w/2);
+
+			if (dist < this.w/2) {
+				this.tap();
+			}
+		}
 	})
 };
