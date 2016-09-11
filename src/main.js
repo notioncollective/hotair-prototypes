@@ -35,8 +35,8 @@ module.exports = function(Crafty) {
 		dartMaxXV: 500
 	}
 	var scenes = [
-		'player-dart',
-		'simple-touch'//,
+		'player-dart' //,
+		// 'simple-touch'//,
 		// 'gravity'
 	];
 	var sceneIndex = 0;
@@ -47,6 +47,10 @@ module.exports = function(Crafty) {
 	var tweets;
 	var dataPromise;
 	var assetsPromise;
+	var score = {
+		d: 0,
+		r: 0
+	}
 
 	var gui;
 
@@ -108,7 +112,6 @@ module.exports = function(Crafty) {
 
 				var balloon = Crafty.e('Balloon');
 				balloon
-					.color('red')
 					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
 
 				balloon.vy = params.balloonYV;
@@ -157,6 +160,24 @@ module.exports = function(Crafty) {
 			// var balloon;
 			// var tweetText;
 
+			var dScore = Crafty.e('2D, DOM, Text, Color')
+				.attr({x: 20, y: 15, w: 300, h: 200})
+				.textFont({size: '50px', weight: 'bold'})
+				.css({ color: 'blue', 'text-align': 'left'})
+				.text(score['d']);
+
+
+			var rScore = Crafty.e('2D, DOM, Text, Color')
+				.attr({x: Crafty.viewport._width - 320, y: 15, w: 300, h: 200})
+				.textFont({size: '50px', weight: 'bold'})
+				.css({ color: 'red', 'text-align': 'right'})
+				.text(score['r']);
+
+
+			function updateScore() {
+				dScore.text(score['d']);
+				rScore.text(score['r']);
+			}
 
 			function shootDart(balloon) {
 
@@ -186,24 +207,22 @@ module.exports = function(Crafty) {
 
 			function createBalloon() {
 
+				var tweet = getNextTweet();
 				var balloonSize = 150;
 				var bx = (Math.random()*(dims.width-balloonSize))+balloonSize/2;
 
 				var tweetText = Crafty.e('TweetText')
 						.attr({x: 30, y: 30, w: 400})
 						.textFont({ size: '30px' })
+						.text(tweet.value.text)
+						.hide();
 
-				tweetText.hide();
-
-				var balloon = Crafty.e('Balloon');
-				balloon
-					.color('red')
-					.attr({ w: balloonSize, h: balloonSize, x: bx, y: dims.height-50 })
-					.checkHits('Dart');
+				var balloon = Crafty.e('Balloon')
+						.attr({ w: balloonSize, h: balloonSize, x: bx, y: dims.height-50 })
+						.checkHits('Dart')
+						.setData(tweet);
 
 				balloon.vy = params.balloonYV;
-
-				tweetText.text(getNextTweet().value.text);
 
 				balloon.attachText(tweetText);
 
@@ -223,6 +242,11 @@ module.exports = function(Crafty) {
 				// balloon.bind('TouchEnd', balloon.tap);
 
 				balloon.bind('Fire', shootDart);
+
+				balloon.bind('LeaveScreenTop', function(b) {
+					score[b.getParty()]++;
+					updateScore();
+				});
 
 				balloon.bind('HitOn', function(data) {
 					var dart = data[0].obj;

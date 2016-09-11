@@ -5,10 +5,12 @@ module.exports = function(Crafty) {
 	Crafty.c('Balloon', {
 		init: function() {
 			// set requirements
-			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion');
+			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion')
+				.color('grey')
 
 			this.selected = false;
 			this.marked = false;
+			this.isHit = false;
 
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Moved', this.onMove);
@@ -20,6 +22,7 @@ module.exports = function(Crafty) {
 			// move on every frame
 			this.bind('EnterFrame', this._move);
 			this.bind('Remove', this._afterDestoy);
+			// this.bind('Fire', this.pop);
 		},
 		attachText: function(text) {
 			this.text = text;
@@ -34,11 +37,22 @@ module.exports = function(Crafty) {
 			}
 			this.text.y = this.y;
 		},
+		setData: function(d) {
+			this.data = d;
+			return this;
+		},
+		getParty: function() {
+			return this.data.value.party;
+		},
 		pop: function() {
 			if (this.marked) {
+				this.showPartyColor();
+				this.isHit = true;
 				this.trigger('Hit', this);
-				this.destroy();
+				this.vy = 0;
+				this.ay = 1000;
 			}
+			return this;
 		},
 		tap: function() {
 			if(!this.selected) {
@@ -63,28 +77,49 @@ module.exports = function(Crafty) {
 			this.trigger('SelectOff', this);
 		},
 		_afterDestoy: function(e) {
-			console.log('_afterDestoy');
 			if(this.text) {
 				this.text.destroy();
 				// this.unbind('SwipeUp');
 				// this.unbind('SwipeDown');
 			}
 		},
+		showPartyColor: function() {
+			var party = this.getParty();
+			if (party === 'd') {
+				this.color('blue');
+			} else {
+				this.color('red');
+			}
+		},
 		onMove: function(e) {
-			if(this.y <= -this.h) {
-				console.log('Destroy me!');
-				this.destroy();
-			} else if(this.text) {
+			// top of screen
+			if (this.y <= -this.h) {
+				this.onLeaveScreenTop();
+
+			// bottom of screen
+			} else if (this.ht && (this.y >= Crafty.viewport._height)) {
+				this.onLeaveScreenBottom();
+			}
+
+			// text follows balloon
+			if (this.text) {
 				this.text.y = this.y;
 			}
 		},
+		onLeaveScreenTop: function() {
+			this.trigger('LeaveScreenTop', this);
+			this.destroy();
+		},
+		onLeaveScreenBottom: function() {
+			this.destroy();
+		},
 		onSwipeUp: function(e) {
-			console.log('onSwipeUp');
 			if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
 				if (this.selected) {
 					// this.trigger('Fire', this);
 					this.vy = -1000;
 					this.ay = -1000;
+					this.showPartyColor();
 				}
 			}
 		},
@@ -96,7 +131,7 @@ module.exports = function(Crafty) {
 		},
 		onTap: function(e) {
 			var dist = Crafty.math.distance(e.center.x, e.center.y, this.x + this.w/2, this.y + this.h/2);
-			console.log('onTap', e.center, dist, this.w/2);
+			// console.log('onTap', e.center, dist, this.w/2);
 
 			if (dist < this.w/2) {
 				this.tap();

@@ -5,9 +5,11 @@ module.exports = function(Crafty) {
 		},
 		hide: function() {
 			this.visible = false;
+			return this;
 		},
 		show: function() {
 			this.visible = true;
+			return this;
 		}
 	});
 }
