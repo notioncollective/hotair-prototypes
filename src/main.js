@@ -36,9 +36,7 @@ module.exports = function(Crafty) {
 		dartMaxXV: 500
 	}
 	var scenes = [
-		'player-dart' //,
-		// 'simple-touch'//,
-		// 'gravity'
+		'player-dart'
 	];
 	var sceneIndex = 0;
 	var dims;
@@ -69,80 +67,6 @@ module.exports = function(Crafty) {
 		  .text("Loading")
 		  .textColor("#FFFFFF");
 	});
-
-	// Intro gravity scene
-	// Crafty.defineScene("gravity",
-	// 	function init() {
-	// 	Crafty.background("rgb(150,200,255)");
-
-
-	// 	// logo
-	// 	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
-	// 		.image('assets/notion_logo.png')
-	// 		.gravity('2D');
-	// 	  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
-
-	// 	// bottom platform
-	// 	var platform = Crafty.e('2D, WebGL, Color')
-	// 									.color(0, 255, 100, 1)
-	// 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});
-	// 	},
-	// 	function uninit() {
-	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
-	// 	}
-	// );
-
-	// Simple touch interface scene
-	Crafty.defineScene("simple-touch",
-		function init() {
-			Crafty.background("rgb(150,200,255)");
-
-
-			console.log('Scene: simple-touch');
-
-			// var balloon;
-			// var tweetText;
-
-			function createBalloon() {
-
-				var tweetText = Crafty.e('TweetText')
-						.attr({x: 30, y: 30, w: 400})
-						.textFont({ size: '30px' })
-
-				tweetText.hide();
-
-				var balloon = Crafty.e('Balloon');
-				balloon
-					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
-
-				balloon.vy = params.balloonYV;
-
-
-				tweetText.text(getNextTweet().value.text);
-
-				balloon.attachText(tweetText);
-
-				// create new balloon when balloon is hit
-				// balloon.bind("Hit", createBalloon);
-
-				// balloon.bind('DoubleClick', balloon.hit );
-				// balloon.bind('DoubleTap', balloon.hit );
-
-
-
-				// balloon.bind('TouchEnd', balloon.tap);
-
-				balloon.bind('Fire', balloon.pop);
-
-			}
-
-			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
-		},
-		function uninit() {
-			window.clearInterval(this.intervalId);
-			Crafty('2D').get().forEach(function(e) { e.destroy(); });
-		}
-	);
 
 
 	// Simple touch interface scene
@@ -227,21 +151,6 @@ module.exports = function(Crafty) {
 
 				balloon.attachText(tweetText);
 
-				// check if balloon is offscreen
-				// balloon.bind("Offscreen", function() {
-				// 	balloon.destroy();
-				// 	// createBalloon();
-				// });
-
-				// create new balloon when balloon is hit
-				// balloon.bind("Hit", createBalloon);
-
-				// balloon.bind('DoubleClick', balloon.hit );
-				// balloon.bind('DoubleTap', balloon.hit );
-
-				// balloon.bind('MouseDown', balloon.tap);
-				// balloon.bind('TouchEnd', balloon.tap);
-
 				balloon.bind('Fire', shootDart);
 
 				balloon.bind('LeaveScreenTop', function(b) {
@@ -324,12 +233,6 @@ module.exports = function(Crafty) {
 
 	// setup crafty
 
-
-	// limit width of game
-	// if(browserSize.width > browserSize.height) {
-	// 	gameWidth = browserSize.height*(.9);
-	// }
-
 	Crafty.init(gameWidth);
 	Crafty.multitouch(true);
 	Crafty.enterScene("loading");
@@ -364,38 +267,9 @@ module.exports = function(Crafty) {
 		data = data.length ? data[0] : undefined;
 		tweets = data.rows;
 
-		// touchEvents = new Hammer(Crafty.stage.elem);
-		// touchEvents = new Hammer(Crafty.stage.elem, {
-		// 	recognizers: [
-		// 		// RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-		// 		// [Hammer.Rotate],
-		// 		[Hammer.Tap],
-		// 		[Hammer.Swipe,{ direction: Hammer.DIRECTION_ALL }],
-		// 	]
-		// });
-		// touchEvents.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-
 		console.log(scenes, sceneIndex);
 
 		Crafty.enterScene(scenes[sceneIndex]);
-
-		// touch events
-		// touchEvents.on('swipeleft', previousScene);
-		// touchEvents.on('swiperight', nextScene);
-
-		// touchEvents.on('swipeup', function(e) {
-		// 	Crafty.trigger('SwipeUp', e);
-		// });
-
-		// touchEvents.on('swipedown', function(e) {
-		// 	Crafty.trigger('SwipeDown', e);
-		// });
-
-		// touchEvents.on('tap', function(e) {
-		// 	Crafty.trigger('Tap', e);
-		// });
-
-
 
 		// mouse events
 		keydown('<left>').on('pressed', previousScene);
