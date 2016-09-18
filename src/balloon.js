@@ -5,24 +5,22 @@ module.exports = function(Crafty) {
 	Crafty.c('Balloon', {
 		init: function() {
 			// set requirements
-			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion')
+			this.requires('2D, WebGL, Touch, Mouse, Color, Touch, Collision, Motion, Swipe')
 				.color('grey')
 
 			this.selected = false;
 			this.marked = false;
 			this.isHit = false;
 
+			// Swipe setup
+			this.minTapDistance = 100;
+
 			// trigger the Offscreen event if balloon goes offscreen
 			this.bind('Moved', this.onMove);
-
-			this.bind('SwipeUp', this.onSwipeUp);
-			this.bind('SwipeDown', this.onSwipeDown);
-			this.bind('Tap', this.onTap);
 
 			// move on every frame
 			this.bind('EnterFrame', this._move);
 			this.bind('Remove', this._afterDestoy);
-			// this.bind('Fire', this.pop);
 		},
 		attachText: function(text) {
 			this.text = text;
@@ -114,28 +112,26 @@ module.exports = function(Crafty) {
 			this.destroy();
 		},
 		onSwipeUp: function(e) {
-			if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
+			// if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
 				if (this.selected) {
 					// this.trigger('Fire', this);
 					this.vy = -1000;
 					this.ay = -1000;
 					this.showPartyColor();
 				}
-			}
+			// }
 		},
 		onSwipeDown: function(e) {
 			console.log('onSwipeDown');
-			if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
+			if (this.selected) {
 				this.tap();
 			}
+			// if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
+			// 	this.tap();
+			// }
 		},
 		onTap: function(e) {
-			var dist = Crafty.math.distance(e.center.x, e.center.y, this.x + this.w/2, this.y + this.h/2);
-			// console.log('onTap', e.center, dist, this.w/2);
-
-			if (dist < this.w/2) {
-				this.tap();
-			}
+			this.select();
 		}
 	})
 };

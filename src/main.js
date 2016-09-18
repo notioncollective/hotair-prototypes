@@ -22,6 +22,7 @@ module.exports = function(Crafty) {
 	require('./tweet-text')(Crafty);
 	require('./player')(Crafty);
 	require('./dart')(Crafty);
+	require('./Swipe')(Crafty);
 
 	// vars
 	var assets = {
@@ -364,14 +365,14 @@ module.exports = function(Crafty) {
 		tweets = data.rows;
 
 		// touchEvents = new Hammer(Crafty.stage.elem);
-		touchEvents = new Hammer(Crafty.stage.elem, {
-			recognizers: [
-				// RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-				// [Hammer.Rotate],
-				[Hammer.Tap],
-				[Hammer.Swipe,{ direction: Hammer.DIRECTION_ALL }],
-			]
-		});
+		// touchEvents = new Hammer(Crafty.stage.elem, {
+		// 	recognizers: [
+		// 		// RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+		// 		// [Hammer.Rotate],
+		// 		[Hammer.Tap],
+		// 		[Hammer.Swipe,{ direction: Hammer.DIRECTION_ALL }],
+		// 	]
+		// });
 		// touchEvents.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
 
 		console.log(scenes, sceneIndex);
@@ -382,17 +383,17 @@ module.exports = function(Crafty) {
 		// touchEvents.on('swipeleft', previousScene);
 		// touchEvents.on('swiperight', nextScene);
 
-		touchEvents.on('swipeup', function(e) {
-			Crafty.trigger('SwipeUp', e);
-		});
+		// touchEvents.on('swipeup', function(e) {
+		// 	Crafty.trigger('SwipeUp', e);
+		// });
 
-		touchEvents.on('swipedown', function(e) {
-			Crafty.trigger('SwipeDown', e);
-		});
+		// touchEvents.on('swipedown', function(e) {
+		// 	Crafty.trigger('SwipeDown', e);
+		// });
 
-		touchEvents.on('tap', function(e) {
-			Crafty.trigger('Tap', e);
-		});
+		// touchEvents.on('tap', function(e) {
+		// 	Crafty.trigger('Tap', e);
+		// });
 
 
 
