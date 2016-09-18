@@ -27,7 +27,7 @@ body {
 }
 
 .TweetText {
-  word-spacing: 9px;
+  word-spacing: .5em;
   padding-top: 7px;
 }
 
