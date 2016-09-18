@@ -23,6 +23,7 @@ module.exports = function(Crafty) {
 	require('./player')(Crafty);
 	require('./dart')(Crafty);
 	require('./Swipe')(Crafty);
+	require('./timer')(Crafty);
 
 	// vars
 	var assets = {
@@ -36,9 +37,7 @@ module.exports = function(Crafty) {
 		dartMaxXV: 500
 	}
 	var scenes = [
-		'player-dart' //,
-		// 'simple-touch'//,
-		// 'gravity'
+		'player-dart'
 	];
 	var sceneIndex = 0;
 	var dims;
@@ -70,86 +69,18 @@ module.exports = function(Crafty) {
 		  .textColor("#FFFFFF");
 	});
 
-	// Intro gravity scene
-	// Crafty.defineScene("gravity",
-	// 	function init() {
-	// 	Crafty.background("rgb(150,200,255)");
-
-
-	// 	// logo
-	// 	var logo = Crafty.e('2D, WebGL, Image, Draggable, Gravity')
-	// 		.image('assets/notion_logo.png')
-	// 		.gravity('2D');
-	// 	  // .attr({x: dims.width/2-size/2, y: dims.height/2-size/2, w: size, h: size})
-
-	// 	// bottom platform
-	// 	var platform = Crafty.e('2D, WebGL, Color')
-	// 									.color(0, 255, 100, 1)
-	// 									.attr({x: 0, y: dims.height-5, w: dims.width, h: 10});
-	// 	},
-	// 	function uninit() {
-	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
-	// 	}
-	// );
-
-	// Simple touch interface scene
-	// Crafty.defineScene("simple-touch",
-	// 	function init() {
-	// 		Crafty.background("rgb(150,200,255)");
-
-
-	// 		console.log('Scene: simple-touch');
-
-	// 		// var balloon;
-	// 		// var tweetText;
-
-	// 		function createBalloon() {
-
-	// 			var tweetText = Crafty.e('TweetText')
-	// 					.attr({x: 30, y: 30, w: 400})
-
-	// 			tweetText.hide();
-
-	// 			var balloon = Crafty.e('Balloon');
-	// 			balloon
-	// 				.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
-
-	// 			balloon.vy = params.balloonYV;
-
-
-	// 			tweetText.text(getNextTweet().value.text);
-
-	// 			balloon.attachText(tweetText);
-
-	// 			// create new balloon when balloon is hit
-	// 			// balloon.bind("Hit", createBalloon);
-
-	// 			// balloon.bind('DoubleClick', balloon.hit );
-	// 			// balloon.bind('DoubleTap', balloon.hit );
-
-
-
-	// 			// balloon.bind('TouchEnd', balloon.tap);
-
-	// 			balloon.bind('Fire', balloon.pop);
-
-	// 		}
-
-	// 		this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
-	// 	},
-	// 	function uninit() {
-	// 		window.clearInterval(this.intervalId);
-	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
-	// 	}
-	// );
 
 
 	// Simple touch interface scene
 	Crafty.defineScene("player-dart",
 		function init() {
+
 			Crafty.background("rgb(150,200,255)");
 
 			console.log('Scene: player-dart');
+			var gameOverText;
+			var winnerText;
+			var newGameText;
 
 			var player = Crafty.e('Player')
 											.attr({ w: 50, h: 50, y: 10});
@@ -157,8 +88,9 @@ module.exports = function(Crafty) {
 
 			player._x = (dims.width/2) - player.w/2;
 
-			// var balloon;
-			// var tweetText;
+			var balloons = [];
+
+			startBalloons();
 
 			var dScore = Crafty.e('2D, DOM, Text, Color')
 				.attr({x: 20, y: 15, w: 300, h: 200})
@@ -173,6 +105,71 @@ module.exports = function(Crafty) {
 				.css({ color: 'red', 'text-align': 'right'})
 				.text(score['r']);
 
+			var gameTimer = Crafty.e('Timer')
+				.setDuration(60)
+				.startTimer();
+
+			Crafty.bind('TimerDone', function() {
+				console.log('Game over!');
+				balloons.forEach(function(b) {
+					b.destroy();
+				});
+				clearInterval(intervalId);
+				gameOver();
+			});
+
+			function gameOver() {
+
+				gameOverText = Crafty.e('2D, DOM, Text, Color')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2 - 100, w: 300, h: 200})
+					.textFont({size: '30px', weight: 'bold'})
+					.css({ color: 'black', 'text-align': 'center'})
+					.text('Game Over');
+
+				winnerText = Crafty.e('2D, DOM, Text, Color')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2, w: 300, h: 200})
+					.textFont({size: '30px', weight: 'bold'})
+					.css({ color: 'gray', 'text-align': 'center'});
+
+				if (score['r'] === score['d']) {
+					// tie
+					winnerText.text('Tie game — political stagnation.');
+				} else {
+					winnerText
+						.css({ color: score['r'] > score['d'] ? 'red' : 'blue'})
+						.text((score['r'] > score['d'] ? 'Republicans' : 'Democrats') + ' win this time!');
+				}
+
+				newGameText = Crafty.e('2D, DOM, Text, Color, Swipe')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2 + 100, w: 300, h: 200})
+					.textFont({size: '50px', weight: 'bold'})
+					.css({ color: 'black', 'text-align': 'center'})
+					.text('Play Again');
+
+				newGameText.onTap = newGame;
+			}
+
+			function newGame() {
+				// reset score
+				score = {
+					d: 0,
+					r: 0
+				};
+				updateScore();
+
+				// remove texts
+				gameOverText.destroy();
+				winnerText.destroy();
+				newGameText.destroy();
+
+				startBalloons();
+				gameTimer.restartTimer();
+			}
+
+			function startBalloons() {
+				createBalloon();
+				intervalId = window.setInterval(createBalloon.bind(this), 3000);
+			}
 
 			function updateScore() {
 				dScore.text(score['d']);
@@ -225,21 +222,6 @@ module.exports = function(Crafty) {
 
 				balloon.attachText(tweetText);
 
-				// check if balloon is offscreen
-				// balloon.bind("Offscreen", function() {
-				// 	balloon.destroy();
-				// 	// createBalloon();
-				// });
-
-				// create new balloon when balloon is hit
-				// balloon.bind("Hit", createBalloon);
-
-				// balloon.bind('DoubleClick', balloon.hit );
-				// balloon.bind('DoubleTap', balloon.hit );
-
-				// balloon.bind('MouseDown', balloon.tap);
-				// balloon.bind('TouchEnd', balloon.tap);
-
 				balloon.bind('Fire', shootDart);
 
 				balloon.bind('LeaveScreenTop', function(b) {
@@ -263,9 +245,9 @@ module.exports = function(Crafty) {
 						}
 					});
 				});
-			}
 
-			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
+				balloons.push(balloon);
+			}
 		},
 		function uninit() {
 			window.clearInterval(this.intervalId);
@@ -322,12 +304,6 @@ module.exports = function(Crafty) {
 
 	// setup crafty
 
-
-	// limit width of game
-	// if(browserSize.width > browserSize.height) {
-	// 	gameWidth = browserSize.height*(.9);
-	// }
-
 	Crafty.init(gameWidth);
 	Crafty.multitouch(true);
 	Crafty.enterScene("loading");
@@ -362,38 +338,9 @@ module.exports = function(Crafty) {
 		data = data.length ? data[0] : undefined;
 		tweets = data.rows;
 
-		// touchEvents = new Hammer(Crafty.stage.elem);
-		// touchEvents = new Hammer(Crafty.stage.elem, {
-		// 	recognizers: [
-		// 		// RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-		// 		// [Hammer.Rotate],
-		// 		[Hammer.Tap],
-		// 		[Hammer.Swipe,{ direction: Hammer.DIRECTION_ALL }],
-		// 	]
-		// });
-		// touchEvents.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-
 		console.log(scenes, sceneIndex);
 
 		Crafty.enterScene(scenes[sceneIndex]);
-
-		// touch events
-		// touchEvents.on('swipeleft', previousScene);
-		// touchEvents.on('swiperight', nextScene);
-
-		// touchEvents.on('swipeup', function(e) {
-		// 	Crafty.trigger('SwipeUp', e);
-		// });
-
-		// touchEvents.on('swipedown', function(e) {
-		// 	Crafty.trigger('SwipeDown', e);
-		// });
-
-		// touchEvents.on('tap', function(e) {
-		// 	Crafty.trigger('Tap', e);
-		// });
-
-
 
 		// mouse events
 		keydown('<left>').on('pressed', previousScene);
