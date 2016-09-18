@@ -25,15 +25,16 @@ module.exports = function(Crafty) {
 		attachText: function(text) {
 			this.text = text;
 
-			var margin = 20;
+			var horizontalMargin = 24;
+			var verticalMargin = 10;
 
 			if((this.x + (this.w / 2)) > (Crafty.viewport._width / 2)) {
 				this.text.css({ 'text-align' : 'right'});
-				this.text.x = this.x - this.text.w - margin;
+				this.text.x = this.x - this.text.w - horizontalMargin;
 			} else {
-				this.text.x = this.x + this.w + margin;
+				this.text.x = this.x + this.w + horizontalMargin;
 			}
-			this.text.y = this.y;
+			this.text.y = this.y + verticalMargin;
 		},
 		setData: function(d) {
 			this.data = d;

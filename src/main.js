@@ -93,56 +93,55 @@ module.exports = function(Crafty) {
 	// );
 
 	// Simple touch interface scene
-	Crafty.defineScene("simple-touch",
-		function init() {
-			Crafty.background("rgb(150,200,255)");
+	// Crafty.defineScene("simple-touch",
+	// 	function init() {
+	// 		Crafty.background("rgb(150,200,255)");
 
 
-			console.log('Scene: simple-touch');
+	// 		console.log('Scene: simple-touch');
 
-			// var balloon;
-			// var tweetText;
+	// 		// var balloon;
+	// 		// var tweetText;
 
-			function createBalloon() {
+	// 		function createBalloon() {
 
-				var tweetText = Crafty.e('TweetText')
-						.attr({x: 30, y: 30, w: 400})
-						.textFont({ size: '30px' })
+	// 			var tweetText = Crafty.e('TweetText')
+	// 					.attr({x: 30, y: 30, w: 400})
 
-				tweetText.hide();
+	// 			tweetText.hide();
 
-				var balloon = Crafty.e('Balloon');
-				balloon
-					.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
+	// 			var balloon = Crafty.e('Balloon');
+	// 			balloon
+	// 				.attr({ w: 150, h: 150, x: Math.random()*dims.width, y: dims.height-50 })
 
-				balloon.vy = params.balloonYV;
-
-
-				tweetText.text(getNextTweet().value.text);
-
-				balloon.attachText(tweetText);
-
-				// create new balloon when balloon is hit
-				// balloon.bind("Hit", createBalloon);
-
-				// balloon.bind('DoubleClick', balloon.hit );
-				// balloon.bind('DoubleTap', balloon.hit );
+	// 			balloon.vy = params.balloonYV;
 
 
+	// 			tweetText.text(getNextTweet().value.text);
 
-				// balloon.bind('TouchEnd', balloon.tap);
+	// 			balloon.attachText(tweetText);
 
-				balloon.bind('Fire', balloon.pop);
+	// 			// create new balloon when balloon is hit
+	// 			// balloon.bind("Hit", createBalloon);
 
-			}
+	// 			// balloon.bind('DoubleClick', balloon.hit );
+	// 			// balloon.bind('DoubleTap', balloon.hit );
 
-			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
-		},
-		function uninit() {
-			window.clearInterval(this.intervalId);
-			Crafty('2D').get().forEach(function(e) { e.destroy(); });
-		}
-	);
+
+
+	// 			// balloon.bind('TouchEnd', balloon.tap);
+
+	// 			balloon.bind('Fire', balloon.pop);
+
+	// 		}
+
+	// 		this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
+	// 	},
+	// 	function uninit() {
+	// 		window.clearInterval(this.intervalId);
+	// 		Crafty('2D').get().forEach(function(e) { e.destroy(); });
+	// 	}
+	// );
 
 
 	// Simple touch interface scene
@@ -213,9 +212,8 @@ module.exports = function(Crafty) {
 				var bx = (Math.random()*(dims.width-balloonSize))+balloonSize/2;
 
 				var tweetText = Crafty.e('TweetText')
-						.attr({x: 30, y: 30, w: 400})
-						.textFont({ size: '30px' })
-						.text(tweet.value.text)
+						.attr({x: 30, y: 30, w: 500})
+						.setTweetText(tweet.value.text)
 						.hide();
 
 				var balloon = Crafty.e('Balloon')

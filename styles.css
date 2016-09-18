@@ -1,3 +1,14 @@
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('assets/PressStart2P/pressstart2p.woff') format('woff'),
+       url('assets/PressStart2P/PressStart2P-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Minecraftia-Regular';
+  src: url('assets/minecraftia/Minecraftia-Regular.ttf') format('truetype');
+}
+
 body {
 	margin: 0;
 	padding: 0;
@@ -13,4 +24,20 @@ body {
 
 #cr-stage {
 	margin: 0 auto;
+}
+
+.TweetText .link {
+  opacity: .5;
+}
+
+.TweetText .mention {
+  color: magenta;
+}
+
+.TweetText .mention .at {
+  opacity: .15;
+}
+
+.TweetText .hashtag {
+  color: purple;
 }
