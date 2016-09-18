@@ -26,6 +26,11 @@ body {
 	margin: 0 auto;
 }
 
+.TweetText {
+  word-spacing: 9px;
+  padding-top: 7px;
+}
+
 .TweetText .link {
   opacity: .5;
 }

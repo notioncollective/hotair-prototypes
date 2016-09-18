@@ -12,6 +12,7 @@ module.exports = function(Crafty) {
 
 		},
 		setTweetText: function(text) {
+			// text = '<code>'+text+'</code>'
 			text = text.replace(urlPattern, '<span class="link">[link]</span>');
 			text = text.replace(/@(\w+)/gi, '<span class="mention"><span class="at">@</span>$1</span>');
 			text = text.replace(/#(\w+)/gi, '<span class="hashtag">#$1</span>');
