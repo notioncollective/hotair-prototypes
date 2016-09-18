@@ -53,12 +53,7 @@ module.exports = function(Crafty) {
 			return this;
 		},
 		tap: function() {
-			if(!this.selected) {
-				this.select();
-			} else {
-				this.marked = true;
-				this.trigger('Fire', this);
-			}
+			this.select();
 		},
 		select: function() {
 			this.selected = true;
@@ -112,26 +107,23 @@ module.exports = function(Crafty) {
 			this.destroy();
 		},
 		onSwipeUp: function(e) {
-			// if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
-				if (this.selected) {
-					// this.trigger('Fire', this);
-					this.vy = -1000;
-					this.ay = -1000;
-					this.showPartyColor();
-				}
-			// }
+			if (this.selected) {
+				this.vy = -1000;
+				this.ay = -1000;
+				this.showPartyColor();
+				this.selected = false;
+			}
 		},
 		onSwipeDown: function(e) {
 			console.log('onSwipeDown');
 			if (this.selected) {
-				this.tap();
+				this.marked = true;
+				this.trigger('Fire', this);
+				this.selected = false;
 			}
-			// if (Crafty.math.distance(e.center.x - e.deltaX/2, e.center.y - e.deltaY/2, this.x + this.w/2, this.y + this.h/2) < 300) {
-			// 	this.tap();
-			// }
 		},
 		onTap: function(e) {
-			this.select();
+			this.tap();
 		}
 	})
 };

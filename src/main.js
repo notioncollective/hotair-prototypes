@@ -23,6 +23,7 @@ module.exports = function(Crafty) {
 	require('./player')(Crafty);
 	require('./dart')(Crafty);
 	require('./Swipe')(Crafty);
+	require('./timer')(Crafty);
 
 	// vars
 	var assets = {
@@ -72,9 +73,13 @@ module.exports = function(Crafty) {
 	// Simple touch interface scene
 	Crafty.defineScene("player-dart",
 		function init() {
+
 			Crafty.background("rgb(150,200,255)");
 
 			console.log('Scene: player-dart');
+			var gameOverText;
+			var winnerText;
+			var newGameText;
 
 			var player = Crafty.e('Player')
 											.attr({ w: 50, h: 50, y: 10});
@@ -82,8 +87,9 @@ module.exports = function(Crafty) {
 
 			player._x = (dims.width/2) - player.w/2;
 
-			// var balloon;
-			// var tweetText;
+			var balloons = [];
+
+			startBalloons();
 
 			var dScore = Crafty.e('2D, DOM, Text, Color')
 				.attr({x: 20, y: 15, w: 300, h: 200})
@@ -98,6 +104,71 @@ module.exports = function(Crafty) {
 				.css({ color: 'red', 'text-align': 'right'})
 				.text(score['r']);
 
+			var gameTimer = Crafty.e('Timer')
+				.setDuration(60)
+				.startTimer();
+
+			Crafty.bind('TimerDone', function() {
+				console.log('Game over!');
+				balloons.forEach(function(b) {
+					b.destroy();
+				});
+				clearInterval(intervalId);
+				gameOver();
+			});
+
+			function gameOver() {
+
+				gameOverText = Crafty.e('2D, DOM, Text, Color')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2 - 100, w: 300, h: 200})
+					.textFont({size: '30px', weight: 'bold'})
+					.css({ color: 'black', 'text-align': 'center'})
+					.text('Game Over');
+
+				winnerText = Crafty.e('2D, DOM, Text, Color')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2, w: 300, h: 200})
+					.textFont({size: '30px', weight: 'bold'})
+					.css({ color: 'gray', 'text-align': 'center'});
+
+				if (score['r'] === score['d']) {
+					// tie
+					winnerText.text('Tie game — political stagnation.');
+				} else {
+					winnerText
+						.css({ color: score['r'] > score['d'] ? 'red' : 'blue'})
+						.text((score['r'] > score['d'] ? 'Republicans' : 'Democrats') + ' win this time!');
+				}
+
+				newGameText = Crafty.e('2D, DOM, Text, Color, Swipe')
+					.attr({x: Crafty.viewport._width / 2 - 150, y: Crafty.viewport._height / 2 + 100, w: 300, h: 200})
+					.textFont({size: '50px', weight: 'bold'})
+					.css({ color: 'black', 'text-align': 'center'})
+					.text('Play Again');
+
+				newGameText.onTap = newGame;
+			}
+
+			function newGame() {
+				// reset score
+				score = {
+					d: 0,
+					r: 0
+				};
+				updateScore();
+
+				// remove texts
+				gameOverText.destroy();
+				winnerText.destroy();
+				newGameText.destroy();
+
+				startBalloons();
+				gameTimer.restartTimer();
+			}
+
+			function startBalloons() {
+				createBalloon();
+				intervalId = window.setInterval(createBalloon.bind(this), 3000);
+			}
 
 			function updateScore() {
 				dScore.text(score['d']);
@@ -174,9 +245,9 @@ module.exports = function(Crafty) {
 						}
 					});
 				});
-			}
 
-			this.intervalId = window.setInterval(createBalloon.bind(this), 3000);
+				balloons.push(balloon);
+			}
 		},
 		function uninit() {
 			window.clearInterval(this.intervalId);
